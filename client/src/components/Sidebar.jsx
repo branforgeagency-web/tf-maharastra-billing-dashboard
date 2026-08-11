@@ -2,10 +2,22 @@ import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { 
   TrendingUp, Compass, Landmark, ShieldAlert, 
-  BarChart3, Users, BookOpenCheck, Sparkles, BookOpen, X, ChevronRight, Shield, UserCheck
+  BarChart3, Users, BookOpenCheck, Sparkles, BookOpen, X, ChevronRight, UserPlus
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import logoImg from '../assets/thoughtflows-logo.png';
+
+const ROLE_BADGES = {
+  bb_admin: { label: 'MANAGEMENT (BB ADMIN)', bg: '#16213e', color: '#fff' },
+  operations_head: { label: 'OPERATIONS HEAD', bg: '#6b21a8', color: '#fff' },
+  department_head: { label: 'DEPARTMENT HEAD', bg: '#b45309', color: '#fff' },
+  finance_manager: { label: 'FINANCE MANAGER', bg: '#0d9488', color: '#fff' },
+  branch_head: { label: 'BRANCH HEAD', bg: '#cff4fc', color: '#087990' },
+  admin: { label: 'ADMIN', bg: '#16213e', color: '#fff' },
+  management: { label: 'MANAGEMENT', bg: '#0284c7', color: '#fff' },
+};
+
+const ALL_ROLES = ['bb_admin', 'operations_head', 'department_head', 'finance_manager', 'branch_head', 'admin', 'management'];
 
 const NAV_ITEMS = [
   { 
@@ -15,7 +27,7 @@ const NAV_ITEMS = [
     icon: TrendingUp, 
     iconBg: 'linear-gradient(135deg, #14b8a6 0%, #0d9488 50%, #0f766e 100%)',
     glowColor: 'rgba(20, 184, 166, 0.45)',
-    roles: ['admin', 'management']
+    roles: ALL_ROLES
   },
   { 
     path: '/daily-business', 
@@ -24,7 +36,7 @@ const NAV_ITEMS = [
     icon: Compass, 
     iconBg: 'linear-gradient(135deg, #ff7e5f 0%, #f97316 50%, #ea580c 100%)',
     glowColor: 'rgba(249, 115, 22, 0.45)',
-    roles: ['admin', 'management']
+    roles: ['bb_admin', 'operations_head', 'department_head', 'branch_head', 'admin', 'management']
   },
   { 
     path: '/b2b', 
@@ -33,7 +45,7 @@ const NAV_ITEMS = [
     icon: Landmark, 
     iconBg: 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 50%, #1d4ed8 100%)',
     glowColor: 'rgba(59, 130, 246, 0.45)',
-    roles: ['admin', 'management']
+    roles: ALL_ROLES
   },
   { 
     path: '/pending-fees', 
@@ -42,7 +54,7 @@ const NAV_ITEMS = [
     icon: ShieldAlert, 
     iconBg: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%)',
     glowColor: 'rgba(245, 158, 11, 0.45)',
-    roles: ['admin', 'management']
+    roles: ALL_ROLES
   },
   { 
     path: '/profit-loss', 
@@ -51,7 +63,7 @@ const NAV_ITEMS = [
     icon: BarChart3, 
     iconBg: 'linear-gradient(135deg, #334155 0%, #1e293b 50%, #0f172a 100%)',
     glowColor: 'rgba(30, 41, 59, 0.5)',
-    roles: ['admin']
+    roles: ['bb_admin', 'operations_head', 'finance_manager', 'admin']
   },
   { 
     path: '/payroll', 
@@ -60,7 +72,7 @@ const NAV_ITEMS = [
     icon: Users, 
     iconBg: 'linear-gradient(135deg, #38bdf8 0%, #0284c7 50%, #0369a1 100%)',
     glowColor: 'rgba(56, 189, 248, 0.45)',
-    roles: ['admin']
+    roles: ['bb_admin', 'operations_head', 'admin']
   },
   { 
     path: '/balance-sheet', 
@@ -69,7 +81,7 @@ const NAV_ITEMS = [
     icon: BookOpenCheck, 
     iconBg: 'linear-gradient(135deg, #c084fc 0%, #a855f7 50%, #7e22ce 100%)',
     glowColor: 'rgba(168, 85, 247, 0.45)',
-    roles: ['admin']
+    roles: ['bb_admin', 'operations_head', 'finance_manager', 'admin']
   },
   { 
     path: '/initial-investment', 
@@ -78,7 +90,16 @@ const NAV_ITEMS = [
     icon: Sparkles, 
     iconBg: 'linear-gradient(135deg, #f43f5e 0%, #e11d48 50%, #be123c 100%)',
     glowColor: 'rgba(244, 63, 94, 0.45)',
-    roles: ['admin']
+    roles: ['bb_admin', 'operations_head', 'admin']
+  },
+  { 
+    path: '/user-management', 
+    label: 'User Management', 
+    subtitle: 'Create & edit users',
+    icon: UserPlus, 
+    iconBg: 'linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%)',
+    glowColor: 'rgba(16, 185, 129, 0.45)',
+    roles: ['bb_admin', 'operations_head', 'admin']
   },
   { 
     path: '/user-guide', 
@@ -87,7 +108,7 @@ const NAV_ITEMS = [
     icon: BookOpen, 
     iconBg: 'linear-gradient(135deg, #2dd4bf 0%, #14b8a6 50%, #0f766e 100%)',
     glowColor: 'rgba(45, 212, 191, 0.45)',
-    roles: ['admin', 'management']
+    roles: ALL_ROLES
   },
 ];
 
@@ -100,8 +121,9 @@ export default function Sidebar({ isMobileOpen, onCloseMobile }) {
     if (onCloseMobile) onCloseMobile();
   };
 
-  const userRole = user?.role || 'admin';
+  const userRole = user?.role || 'bb_admin';
   const visibleNavItems = NAV_ITEMS.filter(item => item.roles.includes(userRole));
+  const activeRoleBadge = ROLE_BADGES[userRole] || { label: userRole?.toUpperCase(), bg: '#16213e', color: '#fff' };
 
   return (
     <div className={`portal-sidebar-container ${isMobileOpen ? 'mobile-open' : ''}`}>
@@ -121,26 +143,29 @@ export default function Sidebar({ isMobileOpen, onCloseMobile }) {
       <div style={{
         margin: '0 12px 12px 12px',
         padding: '8px 12px',
-        background: userRole === 'admin' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(14, 165, 233, 0.1)',
-        border: `1px solid ${userRole === 'admin' ? 'rgba(16, 185, 129, 0.25)' : 'rgba(14, 165, 233, 0.25)'}`,
-        borderRadius: '10px',
+        background: 'rgba(255, 255, 255, 0.04)',
+        border: '1px solid rgba(255, 255, 255, 0.08)',
+        borderRadius: '12px',
         display: 'flex',
-        alignItems: 'center',
-        gap: '8px'
+        flexDirection: 'column',
+        gap: '4px'
       }}>
-        {userRole === 'admin' ? (
-          <Shield className="w-4 h-4 text-emerald-400" />
-        ) : (
-          <UserCheck className="w-4 h-4 text-sky-400" />
-        )}
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <span style={{ fontSize: '11px', fontWeight: '800', color: userRole === 'admin' ? '#34d399' : '#38bdf8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            {userRole} Access
-          </span>
-          <span style={{ fontSize: '10px', color: 'var(--text-slate-400, #94a3b8)' }}>
-            {userRole === 'admin' ? 'Full Administrator Mode' : 'Operational Management Mode'}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span style={{ fontSize: '10px', color: '#94a3b8', fontWeight: '700', textTransform: 'uppercase' }}>Active Role</span>
+          <span style={{
+            padding: '2px 8px',
+            borderRadius: '50px',
+            fontSize: '9px',
+            fontWeight: '800',
+            background: activeRoleBadge.bg,
+            color: activeRoleBadge.color
+          }}>
+            {activeRoleBadge.label}
           </span>
         </div>
+        <span style={{ fontSize: '11px', color: '#e2e8f0', fontWeight: '600', wordBreak: 'break-all' }}>
+          {user?.email || 'Logged In User'}
+        </span>
       </div>
 
       {/* Creative Navigation List with 3D Squircle Badges */}

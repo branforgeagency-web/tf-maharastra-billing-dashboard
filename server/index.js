@@ -28,34 +28,58 @@ const PORT = process.env.PORT || 5055;
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
-// Connect to MongoDB Database & seed default role users
+// Connect to MongoDB Database & seed 5 default role users
+const DEFAULT_5_USERS = [
+  {
+    email: 'management@thoughtflows.in',
+    username: 'management',
+    password: 'manage123',
+    role: 'bb_admin',
+    branch: 'All Branches (Global View)',
+  },
+  {
+    email: 'karthik@thoughtflows.in',
+    username: 'karthik',
+    password: 'ops123',
+    role: 'operations_head',
+    branch: 'All Branches (Global View)',
+  },
+  {
+    email: 'jasmin@thoughtflows.in',
+    username: 'jasmin',
+    password: 'dept123',
+    role: 'department_head',
+    branch: 'All Branches (Global View)',
+  },
+  {
+    email: 'finance@thoughtflows.in',
+    username: 'finance',
+    password: 'fin123',
+    role: 'finance_manager',
+    branch: 'All Branches (Global View)',
+  },
+  {
+    email: 'you@thoughtflows.in',
+    username: 'you',
+    password: 'branch123',
+    role: 'branch_head',
+    branch: 'Pune (FC Road) ★',
+  },
+];
+
 const seedDefaultUsers = async () => {
   try {
-    const adminExists = await User.findOne({ username: 'admin' });
-    if (!adminExists) {
-      await User.create({
-        name: 'Thought Flows Admin',
-        username: 'admin',
-        password: 'admin123',
-        role: 'admin',
-        branch: 'All Branches (Global View)',
+    for (const u of DEFAULT_5_USERS) {
+      const exists = await User.findOne({ 
+        $or: [{ email: u.email }, { username: u.username }] 
       });
-      console.log('✓ Default Admin account seeded: admin / admin123');
-    }
-
-    const managementExists = await User.findOne({ username: 'management' });
-    if (!managementExists) {
-      await User.create({
-        name: 'Maharashtra Manager',
-        username: 'management',
-        password: 'manage123',
-        role: 'management',
-        branch: 'Pune (FC Road) ★',
-      });
-      console.log('✓ Default Management account seeded: management / manage123');
+      if (!exists) {
+        await User.create(u);
+        console.log(`✓ Seeded default user: ${u.email} (${u.role})`);
+      }
     }
   } catch (err) {
-    console.error('Error seeding default accounts:', err);
+    console.error('Error seeding default role accounts:', err);
   }
 };
 
@@ -102,24 +126,32 @@ const generateReceiptNo = async (paidBranch) => {
   return `${prefix}1001`;
 };
 
-// --- AUTHENTICATION ENDPOINTS ---
+// --- AUTHENTICATION & USER MANAGEMENT ENDPOINTS ---
 
 // POST /api/auth/login
 app.post('/api/auth/login', async (req, res) => {
   try {
-    const { username, password } = req.body;
-    if (!username || !password) {
-      return res.status(400).json({ error: 'Username and password are required' });
+    const { email, username, password } = req.body;
+    const inputIdentifier = (email || username || '').toLowerCase().trim();
+
+    if (!inputIdentifier || !password) {
+      return res.status(400).json({ error: 'Email and password are required' });
     }
 
-    const user = await User.findOne({ username: username.toLowerCase().trim() });
+    const user = await User.findOne({
+      $or: [
+        { email: inputIdentifier },
+        { username: inputIdentifier }
+      ]
+    });
+
     if (!user || !user.active) {
-      return res.status(401).json({ error: 'Invalid username or password' });
+      return res.status(401).json({ error: 'Invalid email or password' });
     }
 
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
-      return res.status(401).json({ error: 'Invalid username or password' });
+      return res.status(401).json({ error: 'Invalid email or password' });
     }
 
     const token = generateToken(user);
@@ -127,8 +159,8 @@ app.post('/api/auth/login', async (req, res) => {
       token,
       user: {
         id: user._id,
-        name: user.name,
-        username: user.username,
+        email: user.email,
+        username: user.username || user.email,
         role: user.role,
         branch: user.branch,
       },
@@ -144,8 +176,8 @@ app.get('/api/auth/me', verifyToken, async (req, res) => {
   res.json({
     user: {
       id: req.user._id,
-      name: req.user.name,
-      username: req.user.username,
+      email: req.user.email,
+      username: req.user.username || req.user.email,
       role: req.user.role,
       branch: req.user.branch,
     },
@@ -156,9 +188,116 @@ app.get('/api/auth/me', verifyToken, async (req, res) => {
 app.post('/api/auth/seed', async (req, res) => {
   try {
     await seedDefaultUsers();
-    res.json({ message: 'Default accounts successfully seeded' });
+    res.json({ message: 'Default 5 role accounts successfully seeded' });
   } catch (err) {
     res.status(500).json({ error: 'Failed to seed accounts' });
+  }
+});
+
+// GET /api/users - List all dashboard users (Admin)
+app.get('/api/users', async (req, res) => {
+  try {
+    const users = await User.find({}).select('-password').sort({ createdAt: -1 });
+    res.json(users.map(u => ({
+      id: u._id.toString(),
+      email: u.email,
+      username: u.username,
+      role: u.role,
+      branch: u.branch,
+      active: u.active,
+      createdAt: u.createdAt,
+    })));
+  } catch (err) {
+    console.error('Error fetching users:', err);
+    res.status(500).json({ error: 'Failed to fetch users' });
+  }
+});
+
+// POST /api/users - Create new dashboard user (Admin)
+app.post('/api/users', async (req, res) => {
+  try {
+    const { email, password, role, branch } = req.body;
+
+    if (!email || !password || !role) {
+      return res.status(400).json({ error: 'Email, password, and role are required' });
+    }
+
+    const cleanEmail = email.toLowerCase().trim();
+    const existing = await User.findOne({ email: cleanEmail });
+    if (existing) {
+      return res.status(400).json({ error: 'User with this email already exists' });
+    }
+
+    const newUser = await User.create({
+      email: cleanEmail,
+      username: cleanEmail.split('@')[0],
+      password,
+      role,
+      branch: branch || 'Pune (FC Road) ★',
+    });
+
+    res.status(201).json({
+      id: newUser._id.toString(),
+      email: newUser.email,
+      role: newUser.role,
+      branch: newUser.branch,
+      active: newUser.active,
+      createdAt: newUser.createdAt,
+    });
+  } catch (err) {
+    console.error('Error creating user:', err);
+    res.status(500).json({ error: 'Failed to create dashboard user' });
+  }
+});
+
+// PUT /api/users/:id - Edit user or reset password (Admin)
+app.put('/api/users/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { email, password, role, branch, active } = req.body;
+
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    if (email) user.email = email.toLowerCase().trim();
+    if (role) user.role = role;
+    if (branch) user.branch = branch;
+    if (typeof active === 'boolean') user.active = active;
+
+    if (password && password.trim().length > 0) {
+      user.password = password;
+    }
+
+    await user.save();
+
+    res.json({
+      id: user._id.toString(),
+      email: user.email,
+      role: user.role,
+      branch: user.branch,
+      active: user.active,
+      updatedAt: user.updatedAt,
+    });
+  } catch (err) {
+    console.error('Error updating user:', err);
+    res.status(500).json({ error: 'Failed to update user' });
+  }
+});
+
+// DELETE /api/users/:id - Delete user (Admin)
+app.delete('/api/users/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleted = await User.findByIdAndDelete(id);
+    if (!deleted) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    res.json({ message: 'User successfully deleted', id });
+  } catch (err) {
+    console.error('Error deleting user:', err);
+    res.status(500).json({ error: 'Failed to delete user' });
   }
 });
 

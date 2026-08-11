@@ -3,22 +3,41 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 const AuthContext = createContext(null);
 
 // Fallback demo accounts for local testing if backend API is updating or unreachable
-const DEMO_ACCOUNTS = {
-  admin: {
-    id: 'demo-admin-id',
-    name: 'Thought Flows Admin',
-    username: 'admin',
-    password: 'admin123',
-    role: 'admin',
+const DEMO_5_ACCOUNTS = {
+  'management@thoughtflows.in': {
+    id: 'demo-bbadmin-id',
+    email: 'management@thoughtflows.in',
+    role: 'bb_admin',
     branch: 'All Branches (Global View)',
-  },
-  management: {
-    id: 'demo-management-id',
-    name: 'Maharashtra Manager',
-    username: 'management',
     password: 'manage123',
-    role: 'management',
+  },
+  'karthik@thoughtflows.in': {
+    id: 'demo-opshead-id',
+    email: 'karthik@thoughtflows.in',
+    role: 'operations_head',
+    branch: 'All Branches (Global View)',
+    password: 'ops123',
+  },
+  'jasmin@thoughtflows.in': {
+    id: 'demo-depthead-id',
+    email: 'jasmin@thoughtflows.in',
+    role: 'department_head',
+    branch: 'All Branches (Global View)',
+    password: 'dept123',
+  },
+  'finance@thoughtflows.in': {
+    id: 'demo-finmanager-id',
+    email: 'finance@thoughtflows.in',
+    role: 'finance_manager',
+    branch: 'All Branches (Global View)',
+    password: 'fin123',
+  },
+  'you@thoughtflows.in': {
+    id: 'demo-branchhead-id',
+    email: 'you@thoughtflows.in',
+    role: 'branch_head',
     branch: 'Pune (FC Road) ★',
+    password: 'branch123',
   },
 };
 
@@ -57,14 +76,11 @@ export function AuthProvider({ children }) {
           setUser(data.user);
           localStorage.setItem('tf_auth_user', JSON.stringify(data.user));
         } else if (res.status === 401) {
-          // Explicit token invalidation
           localStorage.removeItem('tf_auth_token');
           localStorage.removeItem('tf_auth_user');
           setUser(null);
           setToken(null);
         } else {
-          // If backend returns HTML 404 (e.g. before Render backend deployment updates),
-          // retain cached session if present so user experience remains smooth
           const savedUser = localStorage.getItem('tf_auth_user');
           if (savedUser) {
             setUser(JSON.parse(savedUser));
@@ -80,15 +96,15 @@ export function AuthProvider({ children }) {
     checkAuth();
   }, []);
 
-  // Login handler with safe JSON handling and local fallback
-  const login = async (username, password) => {
-    const cleanUser = username.toLowerCase().trim();
+  // Login handler accepting email/username and password
+  const login = async (emailOrUsername, password) => {
+    const cleanIdentifier = emailOrUsername.toLowerCase().trim();
 
     try {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: cleanUser, password }),
+        body: JSON.stringify({ email: cleanIdentifier, password }),
       });
 
       const contentType = res.headers.get('content-type') || '';
@@ -106,20 +122,17 @@ export function AuthProvider({ children }) {
       }
     } catch (err) {
       if (err.message && !err.message.includes('Unexpected token') && !err.message.includes('JSON')) {
-        // If server sent valid JSON with an explicit error (e.g. "Invalid password"), throw it!
         throw err;
       }
     }
 
-    // Fallback: If backend API returned HTML 404 (e.g. Render backend build in progress),
-    // authenticate using local demo accounts so testing is never blocked!
-    const demoAcc = DEMO_ACCOUNTS[cleanUser];
+    // Fallback: Check 5 default accounts locally if server returns non-JSON / HTML
+    const demoAcc = DEMO_5_ACCOUNTS[cleanIdentifier];
     if (demoAcc && demoAcc.password === password) {
-      const demoToken = `demo-jwt-token-${cleanUser}-${Date.now()}`;
+      const demoToken = `demo-jwt-${demoAcc.role}-${Date.now()}`;
       const userPayload = {
         id: demoAcc.id,
-        name: demoAcc.name,
-        username: demoAcc.username,
+        email: demoAcc.email,
         role: demoAcc.role,
         branch: demoAcc.branch,
       };
@@ -131,7 +144,7 @@ export function AuthProvider({ children }) {
       return userPayload;
     }
 
-    throw new Error('Invalid username or password.');
+    throw new Error('Invalid email or password.');
   };
 
   // Logout handler
@@ -142,14 +155,15 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
+  const isAdminRole = ['bb_admin', 'operations_head', 'admin'].includes(user?.role);
+
   const value = {
     user,
     token,
     loading,
     login,
     logout,
-    isAdmin: user?.role === 'admin',
-    isManagement: user?.role === 'management',
+    isAdmin: isAdminRole,
   };
 
   return (

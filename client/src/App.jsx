@@ -15,6 +15,7 @@ import ProfitLossView from './views/ProfitLossView';
 import EmployeeSalariesView from './views/EmployeeSalariesView';
 import BalanceSheetView from './views/BalanceSheetView';
 import InitialInvestmentView from './views/InitialInvestmentView';
+import UserManagementView from './views/UserManagementView';
 import UserGuideView from './views/UserGuideView';
 
 import './styles/main.css';
@@ -24,6 +25,8 @@ import './styles/dashboard.css';
 import './styles/modal.css';
 import './styles/modules.css';
 import './styles/login.css';
+
+const ALL_ROLES = ['bb_admin', 'operations_head', 'department_head', 'finance_manager', 'branch_head', 'admin', 'management'];
 
 // React Error Boundary Component to prevent white screens
 class ErrorBoundary extends Component {
@@ -72,55 +75,61 @@ function AnimatedContentWrapper({ selectedBranch, setSelectedBranch }) {
           <Route path="/" element={<Navigate to="/income-expense" replace />} />
           
           <Route path="/income-expense" element={
-            <ProtectedRoute allowedRoles={['admin', 'management']}>
+            <ProtectedRoute allowedRoles={ALL_ROLES}>
               <IncomeExpenseView selectedBranch={selectedBranch} setSelectedBranch={setSelectedBranch} />
             </ProtectedRoute>
           } />
           
           <Route path="/daily-business" element={
-            <ProtectedRoute allowedRoles={['admin', 'management']}>
+            <ProtectedRoute allowedRoles={['bb_admin', 'operations_head', 'department_head', 'branch_head', 'admin', 'management']}>
               <DailyBusinessView selectedBranch={selectedBranch} setSelectedBranch={setSelectedBranch} />
             </ProtectedRoute>
           } />
           
           <Route path="/b2b" element={
-            <ProtectedRoute allowedRoles={['admin', 'management']}>
+            <ProtectedRoute allowedRoles={ALL_ROLES}>
               <B2BRegistryView selectedBranch={selectedBranch} setSelectedBranch={setSelectedBranch} />
             </ProtectedRoute>
           } />
           
           <Route path="/pending-fees" element={
-            <ProtectedRoute allowedRoles={['admin', 'management']}>
+            <ProtectedRoute allowedRoles={ALL_ROLES}>
               <PendingFeesView selectedBranch={selectedBranch} setSelectedBranch={setSelectedBranch} />
             </ProtectedRoute>
           } />
           
           <Route path="/profit-loss" element={
-            <ProtectedRoute allowedRoles={['admin']}>
+            <ProtectedRoute allowedRoles={['bb_admin', 'operations_head', 'finance_manager', 'admin']}>
               <ProfitLossView selectedBranch={selectedBranch} setSelectedBranch={setSelectedBranch} />
             </ProtectedRoute>
           } />
           
           <Route path="/payroll" element={
-            <ProtectedRoute allowedRoles={['admin']}>
+            <ProtectedRoute allowedRoles={['bb_admin', 'operations_head', 'admin']}>
               <EmployeeSalariesView selectedBranch={selectedBranch} setSelectedBranch={setSelectedBranch} />
             </ProtectedRoute>
           } />
           
           <Route path="/balance-sheet" element={
-            <ProtectedRoute allowedRoles={['admin']}>
+            <ProtectedRoute allowedRoles={['bb_admin', 'operations_head', 'finance_manager', 'admin']}>
               <BalanceSheetView selectedBranch={selectedBranch} setSelectedBranch={setSelectedBranch} />
             </ProtectedRoute>
           } />
           
           <Route path="/initial-investment" element={
-            <ProtectedRoute allowedRoles={['admin']}>
+            <ProtectedRoute allowedRoles={['bb_admin', 'operations_head', 'admin']}>
               <InitialInvestmentView selectedBranch={selectedBranch} setSelectedBranch={setSelectedBranch} />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/user-management" element={
+            <ProtectedRoute allowedRoles={['bb_admin', 'operations_head', 'admin']}>
+              <UserManagementView />
             </ProtectedRoute>
           } />
           
           <Route path="/user-guide" element={
-            <ProtectedRoute allowedRoles={['admin', 'management']}>
+            <ProtectedRoute allowedRoles={ALL_ROLES}>
               <UserGuideView />
             </ProtectedRoute>
           } />

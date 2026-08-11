@@ -4,13 +4,18 @@ import bcrypt from 'bcryptjs';
 const UserSchema = new mongoose.Schema({
   name: {
     type: String,
+    trim: true,
+    default: '',
+  },
+  email: {
+    type: String,
     required: true,
+    unique: true,
+    lowercase: true,
     trim: true,
   },
   username: {
     type: String,
-    required: true,
-    unique: true,
     lowercase: true,
     trim: true,
   },
@@ -20,13 +25,21 @@ const UserSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['admin', 'management'],
-    default: 'management',
+    enum: [
+      'bb_admin',
+      'operations_head',
+      'department_head',
+      'finance_manager',
+      'branch_head',
+      'admin',
+      'management'
+    ],
+    default: 'branch_head',
     required: true,
   },
   branch: {
     type: String,
-    default: 'All Branches (Global View)',
+    default: 'Pune (FC Road) ★',
   },
   active: {
     type: Boolean,
