@@ -7,7 +7,7 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/api': {
-        target: 'http://localhost:5055',
+        target: process.env.VITE_API_URL || 'https://tf-maharastra-billing-dashboard.onrender.com',
         changeOrigin: true,
         secure: false,
       },
