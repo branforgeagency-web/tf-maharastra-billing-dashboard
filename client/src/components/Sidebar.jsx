@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { 
   TrendingUp, Compass, Landmark, ShieldAlert, 
-  BarChart3, Users, BookOpenCheck, Sparkles, BookOpen, X, ChevronRight
+  BarChart3, Users, BookOpenCheck, Sparkles, BookOpen, X, ChevronRight, Shield, UserCheck
 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 import logoImg from '../assets/thoughtflows-logo.png';
 
 const NAV_ITEMS = [
@@ -13,7 +14,8 @@ const NAV_ITEMS = [
     subtitle: 'Receipts & vouchers',
     icon: TrendingUp, 
     iconBg: 'linear-gradient(135deg, #14b8a6 0%, #0d9488 50%, #0f766e 100%)',
-    glowColor: 'rgba(20, 184, 166, 0.45)'
+    glowColor: 'rgba(20, 184, 166, 0.45)',
+    roles: ['admin', 'management']
   },
   { 
     path: '/daily-business', 
@@ -21,7 +23,8 @@ const NAV_ITEMS = [
     subtitle: 'Leads & admissions',
     icon: Compass, 
     iconBg: 'linear-gradient(135deg, #ff7e5f 0%, #f97316 50%, #ea580c 100%)',
-    glowColor: 'rgba(249, 115, 22, 0.45)'
+    glowColor: 'rgba(249, 115, 22, 0.45)',
+    roles: ['admin', 'management']
   },
   { 
     path: '/b2b', 
@@ -29,7 +32,8 @@ const NAV_ITEMS = [
     subtitle: 'Institutional revenue',
     icon: Landmark, 
     iconBg: 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 50%, #1d4ed8 100%)',
-    glowColor: 'rgba(59, 130, 246, 0.45)'
+    glowColor: 'rgba(59, 130, 246, 0.45)',
+    roles: ['admin', 'management']
   },
   { 
     path: '/pending-fees', 
@@ -37,7 +41,8 @@ const NAV_ITEMS = [
     subtitle: 'Track student dues',
     icon: ShieldAlert, 
     iconBg: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%)',
-    glowColor: 'rgba(245, 158, 11, 0.45)'
+    glowColor: 'rgba(245, 158, 11, 0.45)',
+    roles: ['admin', 'management']
   },
   { 
     path: '/profit-loss', 
@@ -45,7 +50,8 @@ const NAV_ITEMS = [
     subtitle: 'Monthly · 50-50 share',
     icon: BarChart3, 
     iconBg: 'linear-gradient(135deg, #334155 0%, #1e293b 50%, #0f172a 100%)',
-    glowColor: 'rgba(30, 41, 59, 0.5)'
+    glowColor: 'rgba(30, 41, 59, 0.5)',
+    roles: ['admin']
   },
   { 
     path: '/payroll', 
@@ -53,7 +59,8 @@ const NAV_ITEMS = [
     subtitle: 'Payroll · PF · ESI',
     icon: Users, 
     iconBg: 'linear-gradient(135deg, #38bdf8 0%, #0284c7 50%, #0369a1 100%)',
-    glowColor: 'rgba(56, 189, 248, 0.45)'
+    glowColor: 'rgba(56, 189, 248, 0.45)',
+    roles: ['admin']
   },
   { 
     path: '/balance-sheet', 
@@ -61,7 +68,8 @@ const NAV_ITEMS = [
     subtitle: 'Assets & liabilities',
     icon: BookOpenCheck, 
     iconBg: 'linear-gradient(135deg, #c084fc 0%, #a855f7 50%, #7e22ce 100%)',
-    glowColor: 'rgba(168, 85, 247, 0.45)'
+    glowColor: 'rgba(168, 85, 247, 0.45)',
+    roles: ['admin']
   },
   { 
     path: '/initial-investment', 
@@ -69,7 +77,8 @@ const NAV_ITEMS = [
     subtitle: 'Setup costs & ROI',
     icon: Sparkles, 
     iconBg: 'linear-gradient(135deg, #f43f5e 0%, #e11d48 50%, #be123c 100%)',
-    glowColor: 'rgba(244, 63, 94, 0.45)'
+    glowColor: 'rgba(244, 63, 94, 0.45)',
+    roles: ['admin']
   },
   { 
     path: '/user-guide', 
@@ -77,17 +86,22 @@ const NAV_ITEMS = [
     subtitle: 'Portal documentation',
     icon: BookOpen, 
     iconBg: 'linear-gradient(135deg, #2dd4bf 0%, #14b8a6 50%, #0f766e 100%)',
-    glowColor: 'rgba(45, 212, 191, 0.45)'
+    glowColor: 'rgba(45, 212, 191, 0.45)',
+    roles: ['admin', 'management']
   },
 ];
 
 export default function Sidebar({ isMobileOpen, onCloseMobile }) {
   const [animKey, setAnimKey] = useState(0);
+  const { user } = useAuth();
 
   const handleNavClick = () => {
     setAnimKey(prev => prev + 1);
     if (onCloseMobile) onCloseMobile();
   };
+
+  const userRole = user?.role || 'admin';
+  const visibleNavItems = NAV_ITEMS.filter(item => item.roles.includes(userRole));
 
   return (
     <div className={`portal-sidebar-container ${isMobileOpen ? 'mobile-open' : ''}`}>
@@ -103,9 +117,35 @@ export default function Sidebar({ isMobileOpen, onCloseMobile }) {
         </button>
       </div>
 
+      {/* Role Access Banner */}
+      <div style={{
+        margin: '0 12px 12px 12px',
+        padding: '8px 12px',
+        background: userRole === 'admin' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(14, 165, 233, 0.1)',
+        border: `1px solid ${userRole === 'admin' ? 'rgba(16, 185, 129, 0.25)' : 'rgba(14, 165, 233, 0.25)'}`,
+        borderRadius: '10px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px'
+      }}>
+        {userRole === 'admin' ? (
+          <Shield className="w-4 h-4 text-emerald-400" />
+        ) : (
+          <UserCheck className="w-4 h-4 text-sky-400" />
+        )}
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <span style={{ fontSize: '11px', fontWeight: '800', color: userRole === 'admin' ? '#34d399' : '#38bdf8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            {userRole} Access
+          </span>
+          <span style={{ fontSize: '10px', color: 'var(--text-slate-400, #94a3b8)' }}>
+            {userRole === 'admin' ? 'Full Administrator Mode' : 'Operational Management Mode'}
+          </span>
+        </div>
+      </div>
+
       {/* Creative Navigation List with 3D Squircle Badges */}
       <div key={animKey} className="sidebar-nav-list">
-        {NAV_ITEMS.map((item, idx) => {
+        {visibleNavItems.map((item, idx) => {
           const Icon = item.icon;
           return (
             <NavLink

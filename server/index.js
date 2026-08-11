@@ -17,6 +17,9 @@ import ExamFee from './models/ExamFee.js';
 import TreasuryTransaction from './models/TreasuryTransaction.js';
 import { calculateProfitDistribution } from './services/profitSharingService.js';
 
+import User from './models/User.js';
+import { generateToken, verifyToken, requireRole } from './middleware/auth.js';
+
 dotenv.config();
 
 const app = express();
@@ -25,8 +28,40 @@ const PORT = process.env.PORT || 5055;
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
-// Connect to MongoDB Database
-connectDB();
+// Connect to MongoDB Database & seed default role users
+const seedDefaultUsers = async () => {
+  try {
+    const adminExists = await User.findOne({ username: 'admin' });
+    if (!adminExists) {
+      await User.create({
+        name: 'Thought Flows Admin',
+        username: 'admin',
+        password: 'admin123',
+        role: 'admin',
+        branch: 'All Branches (Global View)',
+      });
+      console.log('✓ Default Admin account seeded: admin / admin123');
+    }
+
+    const managementExists = await User.findOne({ username: 'management' });
+    if (!managementExists) {
+      await User.create({
+        name: 'Maharashtra Manager',
+        username: 'management',
+        password: 'manage123',
+        role: 'management',
+        branch: 'Pune (FC Road) ★',
+      });
+      console.log('✓ Default Management account seeded: management / manage123');
+    }
+  } catch (err) {
+    console.error('Error seeding default accounts:', err);
+  }
+};
+
+connectDB().then(() => {
+  seedDefaultUsers();
+});
 
 // Helper to generate regex matching branch name safely without special character regex errors
 const getBranchRegex = (branchStr) => {
@@ -66,6 +101,66 @@ const generateReceiptNo = async (paidBranch) => {
   }
   return `${prefix}1001`;
 };
+
+// --- AUTHENTICATION ENDPOINTS ---
+
+// POST /api/auth/login
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    if (!username || !password) {
+      return res.status(400).json({ error: 'Username and password are required' });
+    }
+
+    const user = await User.findOne({ username: username.toLowerCase().trim() });
+    if (!user || !user.active) {
+      return res.status(401).json({ error: 'Invalid username or password' });
+    }
+
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      return res.status(401).json({ error: 'Invalid username or password' });
+    }
+
+    const token = generateToken(user);
+    res.json({
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        username: user.username,
+        role: user.role,
+        branch: user.branch,
+      },
+    });
+  } catch (err) {
+    console.error('Login error:', err);
+    res.status(500).json({ error: 'Internal server error during authentication' });
+  }
+});
+
+// GET /api/auth/me
+app.get('/api/auth/me', verifyToken, async (req, res) => {
+  res.json({
+    user: {
+      id: req.user._id,
+      name: req.user.name,
+      username: req.user.username,
+      role: req.user.role,
+      branch: req.user.branch,
+    },
+  });
+});
+
+// POST /api/auth/seed
+app.post('/api/auth/seed', async (req, res) => {
+  try {
+    await seedDefaultUsers();
+    res.json({ message: 'Default accounts successfully seeded' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to seed accounts' });
+  }
+});
 
 // GET /api/branches
 app.get('/api/branches', async (req, res) => {

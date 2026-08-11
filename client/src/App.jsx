@@ -1,9 +1,12 @@
 import React, { useState, useEffect, Component } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
 import Sidebar from './components/Sidebar';
 import TopHeader from './components/TopHeader';
 import CreateReceiptModal from './components/CreateReceiptModal';
 
+import LoginView from './views/LoginView';
 import IncomeExpenseView from './views/IncomeExpenseView';
 import DailyBusinessView from './views/DailyBusinessView';
 import B2BRegistryView from './views/B2BRegistryView';
@@ -20,6 +23,7 @@ import './styles/header.css';
 import './styles/dashboard.css';
 import './styles/modal.css';
 import './styles/modules.css';
+import './styles/login.css';
 
 // React Error Boundary Component to prevent white screens
 class ErrorBoundary extends Component {
@@ -66,22 +70,69 @@ function AnimatedContentWrapper({ selectedBranch, setSelectedBranch }) {
       <ErrorBoundary>
         <Routes>
           <Route path="/" element={<Navigate to="/income-expense" replace />} />
-          <Route path="/income-expense" element={<IncomeExpenseView selectedBranch={selectedBranch} setSelectedBranch={setSelectedBranch} />} />
-          <Route path="/daily-business" element={<DailyBusinessView selectedBranch={selectedBranch} setSelectedBranch={setSelectedBranch} />} />
-          <Route path="/b2b" element={<B2BRegistryView selectedBranch={selectedBranch} setSelectedBranch={setSelectedBranch} />} />
-          <Route path="/pending-fees" element={<PendingFeesView selectedBranch={selectedBranch} setSelectedBranch={setSelectedBranch} />} />
-          <Route path="/profit-loss" element={<ProfitLossView selectedBranch={selectedBranch} setSelectedBranch={setSelectedBranch} />} />
-          <Route path="/payroll" element={<EmployeeSalariesView selectedBranch={selectedBranch} setSelectedBranch={setSelectedBranch} />} />
-          <Route path="/balance-sheet" element={<BalanceSheetView selectedBranch={selectedBranch} setSelectedBranch={setSelectedBranch} />} />
-          <Route path="/initial-investment" element={<InitialInvestmentView selectedBranch={selectedBranch} setSelectedBranch={setSelectedBranch} />} />
-          <Route path="/user-guide" element={<UserGuideView />} />
+          
+          <Route path="/income-expense" element={
+            <ProtectedRoute allowedRoles={['admin', 'management']}>
+              <IncomeExpenseView selectedBranch={selectedBranch} setSelectedBranch={setSelectedBranch} />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/daily-business" element={
+            <ProtectedRoute allowedRoles={['admin', 'management']}>
+              <DailyBusinessView selectedBranch={selectedBranch} setSelectedBranch={setSelectedBranch} />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/b2b" element={
+            <ProtectedRoute allowedRoles={['admin', 'management']}>
+              <B2BRegistryView selectedBranch={selectedBranch} setSelectedBranch={setSelectedBranch} />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/pending-fees" element={
+            <ProtectedRoute allowedRoles={['admin', 'management']}>
+              <PendingFeesView selectedBranch={selectedBranch} setSelectedBranch={setSelectedBranch} />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/profit-loss" element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <ProfitLossView selectedBranch={selectedBranch} setSelectedBranch={setSelectedBranch} />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/payroll" element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <EmployeeSalariesView selectedBranch={selectedBranch} setSelectedBranch={setSelectedBranch} />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/balance-sheet" element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <BalanceSheetView selectedBranch={selectedBranch} setSelectedBranch={setSelectedBranch} />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/initial-investment" element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <InitialInvestmentView selectedBranch={selectedBranch} setSelectedBranch={setSelectedBranch} />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/user-guide" element={
+            <ProtectedRoute allowedRoles={['admin', 'management']}>
+              <UserGuideView />
+            </ProtectedRoute>
+          } />
+
+          <Route path="*" element={<Navigate to="/income-expense" replace />} />
         </Routes>
       </ErrorBoundary>
     </div>
   );
 }
 
-export default function App() {
+function MainDashboardLayout() {
   const [selectedBranch, setSelectedBranch] = useState('Pune (FC Road) ★');
   const [isGlobalReceiptModalOpen, setIsGlobalReceiptModalOpen] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
@@ -96,55 +147,62 @@ export default function App() {
   };
 
   return (
+    <div className="portal-app-layout">
+      {/* Mobile Backdrop Overlay */}
+      <div 
+        className={`mobile-sidebar-backdrop ${isMobileOpen ? 'mobile-open' : ''}`} 
+        onClick={() => setIsMobileOpen(false)} 
+      />
+
+      {/* Fixed / Mobile Off-Canvas Sidebar */}
+      <Sidebar 
+        isMobileOpen={isMobileOpen} 
+        onCloseMobile={() => setIsMobileOpen(false)} 
+      />
+
+      {/* Main Content Area */}
+      <div className="portal-main-wrapper">
+        {/* Sticky Top Header */}
+        <TopHeader
+          selectedBranch={selectedBranch}
+          setSelectedBranch={setSelectedBranch}
+          onOpenReceiptModal={() => setIsGlobalReceiptModalOpen(true)}
+          onToggleMobileSidebar={() => setIsMobileOpen(prev => !prev)}
+          theme={theme}
+          onToggleTheme={handleToggleTheme}
+        />
+
+        {/* Animated Module Viewport */}
+        <AnimatedContentWrapper 
+          selectedBranch={selectedBranch} 
+          setSelectedBranch={setSelectedBranch} 
+        />
+      </div>
+
+      {/* Global Quick Receipt Modal */}
+      <CreateReceiptModal
+        isOpen={isGlobalReceiptModalOpen}
+        onClose={() => setIsGlobalReceiptModalOpen(false)}
+        onSaveSuccess={() => {
+          window.location.reload();
+        }}
+        initialBranch={selectedBranch}
+      />
+    </div>
+  );
+}
+
+export default function App() {
+  return (
     <ErrorBoundary>
-      <BrowserRouter>
-        <div className="portal-app-layout">
-          
-          {/* Mobile Backdrop Overlay */}
-          <div 
-            className={`mobile-sidebar-backdrop ${isMobileOpen ? 'mobile-open' : ''}`} 
-            onClick={() => setIsMobileOpen(false)} 
-          />
-
-          {/* Fixed / Mobile Off-Canvas Sidebar */}
-          <Sidebar 
-            isMobileOpen={isMobileOpen} 
-            onCloseMobile={() => setIsMobileOpen(false)} 
-          />
-
-          {/* Main Content Area */}
-          <div className="portal-main-wrapper">
-            
-            {/* Sticky Top Header */}
-            <TopHeader
-              selectedBranch={selectedBranch}
-              setSelectedBranch={setSelectedBranch}
-              onOpenReceiptModal={() => setIsGlobalReceiptModalOpen(true)}
-              onToggleMobileSidebar={() => setIsMobileOpen(prev => !prev)}
-              theme={theme}
-              onToggleTheme={handleToggleTheme}
-            />
-
-            {/* Animated Module Viewport (Re-triggers stagger animation on every section switch) */}
-            <AnimatedContentWrapper 
-              selectedBranch={selectedBranch} 
-              setSelectedBranch={setSelectedBranch} 
-            />
-
-          </div>
-
-          {/* Global Quick Receipt Modal */}
-          <CreateReceiptModal
-            isOpen={isGlobalReceiptModalOpen}
-            onClose={() => setIsGlobalReceiptModalOpen(false)}
-            onSaveSuccess={() => {
-              window.location.reload();
-            }}
-            initialBranch={selectedBranch}
-          />
-
-        </div>
-      </BrowserRouter>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/login" element={<LoginView />} />
+            <Route path="/*" element={<MainDashboardLayout />} />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
     </ErrorBoundary>
   );
 }
