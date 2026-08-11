@@ -80,7 +80,7 @@ export default function UserManagementView() {
     setEditingUser(user);
     setFormData({
       email: user.email,
-      password: '', // Blank unless resetting
+      password: '',
       role: user.role || 'branch_head',
       branch: user.branch || 'Pune (FC Road) ★',
     });
@@ -159,18 +159,42 @@ export default function UserManagementView() {
   );
 
   return (
-    <div className="portal-module-container animate-fade-in">
+    <div className="portal-module-container animate-fade-in" style={{ padding: '24px' }}>
       
       {/* Header Banner */}
-      <div className="module-header-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        flexWrap: 'wrap', 
+        gap: '16px',
+        background: 'var(--bg-card)',
+        border: '1px solid var(--border-color)',
+        borderRadius: 'var(--radius-lg)',
+        padding: '24px',
+        boxShadow: 'var(--shadow-card)',
+        marginBottom: '24px'
+      }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-            <Users className="w-6 h-6 text-emerald-500" />
-            <h1 style={{ fontSize: '22px', fontWeight: '800', color: 'var(--text-slate-100)', margin: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+            <div style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: '10px',
+              background: 'rgba(16, 185, 129, 0.12)',
+              border: '1px solid rgba(16, 185, 129, 0.3)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'var(--emerald-primary)'
+            }}>
+              <Users className="w-5 h-5 stroke-[2.2]" />
+            </div>
+            <h1 style={{ fontSize: '22px', fontWeight: '800', color: 'var(--text-white)', margin: 0, letterSpacing: '-0.01em' }}>
               User Management
             </h1>
           </div>
-          <p style={{ fontSize: '13px', color: 'var(--text-slate-400)', margin: 0 }}>
+          <p style={{ fontSize: '13.5px', color: 'var(--text-slate-400)', margin: 0, fontWeight: '500' }}>
             Create and edit dashboard user accounts, reset passwords, and assign role privileges.
           </p>
         </div>
@@ -178,37 +202,37 @@ export default function UserManagementView() {
         <button
           onClick={openCreateModal}
           className="btn-primary-green"
-          style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 18px', borderRadius: '12px' }}
+          style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 20px', borderRadius: '12px', fontWeight: '700', fontSize: '13.5px' }}
         >
           <UserPlus className="w-4 h-4" />
           <span>Create New Dashboard User</span>
         </button>
       </div>
 
-      {/* Status Message */}
+      {/* Status Alert Message */}
       {statusMsg.text && (
         <div style={{
           padding: '12px 16px',
-          borderRadius: '10px',
-          marginBottom: '16px',
+          borderRadius: '12px',
+          marginBottom: '20px',
           fontSize: '13px',
           fontWeight: '600',
           display: 'flex',
           alignItems: 'center',
           gap: '8px',
           background: statusMsg.type === 'error' ? 'rgba(244, 63, 94, 0.1)' : 'rgba(16, 185, 129, 0.1)',
-          border: `1px solid ${statusMsg.type === 'error' ? 'rgba(244, 63, 94, 0.25)' : 'rgba(16, 185, 129, 0.25)'}`,
-          color: statusMsg.type === 'error' ? '#fb7185' : '#34d399',
+          border: `1px solid ${statusMsg.type === 'error' ? 'rgba(244, 63, 94, 0.3)' : 'rgba(16, 185, 129, 0.3)'}`,
+          color: statusMsg.type === 'error' ? '#e11d48' : '#059669',
         }}>
           {statusMsg.type === 'error' ? <AlertCircle size={16} /> : <CheckCircle size={16} />}
           <span>{statusMsg.text}</span>
         </div>
       )}
 
-      {/* Filter / Search Bar */}
-      <div style={{ margin: '20px 0 16px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ position: 'relative', width: '320px' }}>
-          <Search style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', width: '16px', height: '16px', color: '#64748b' }} />
+      {/* Search & Refresh Controls Bar */}
+      <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+        <div style={{ position: 'relative', width: '100%', maxWidth: '360px' }}>
+          <Search style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', width: '16px', height: '16px', color: 'var(--text-slate-400)' }} />
           <input
             type="text"
             value={searchQuery}
@@ -216,11 +240,11 @@ export default function UserManagementView() {
             placeholder="Search by email, role, or branch..."
             style={{
               width: '100%',
-              padding: '10px 12px 10px 36px',
-              background: 'var(--bg-slate-900, #0f172a)',
-              border: '1px solid var(--border-slate-800, #1e293b)',
-              borderRadius: '10px',
-              color: 'var(--text-slate-100, #fff)',
+              padding: '11px 14px 11px 40px',
+              background: 'var(--bg-input)',
+              border: '1px solid var(--border-color)',
+              borderRadius: '12px',
+              color: 'var(--text-white)',
               fontSize: '13px',
               outline: 'none'
             }}
@@ -232,14 +256,16 @@ export default function UserManagementView() {
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '6px',
-            padding: '8px 14px',
-            background: 'var(--bg-slate-900, #0f172a)',
-            border: '1px solid var(--border-slate-800, #1e293b)',
-            borderRadius: '10px',
-            color: 'var(--text-slate-300)',
-            fontSize: '12px',
-            cursor: 'pointer'
+            gap: '8px',
+            padding: '10px 16px',
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border-color)',
+            borderRadius: '12px',
+            color: 'var(--text-slate-200)',
+            fontSize: '13px',
+            fontWeight: '600',
+            cursor: 'pointer',
+            boxShadow: 'var(--shadow-card)'
           }}
         >
           <RefreshCw size={14} />
@@ -247,28 +273,28 @@ export default function UserManagementView() {
         </button>
       </div>
 
-      {/* Users Table */}
-      <div className="table-responsive-wrapper" style={{ background: 'var(--bg-slate-900, #0f172a)', border: '1px solid var(--border-slate-800, #1e293b)', borderRadius: '16px', overflow: 'hidden' }}>
-        <table className="portal-data-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
+      {/* Responsive Data Table */}
+      <div className="portal-table-container">
+        <table className="portal-data-table">
           <thead>
-            <tr style={{ background: 'rgba(255, 255, 255, 0.03)', borderBottom: '1px solid var(--border-slate-800, #1e293b)' }}>
-              <th style={{ padding: '14px 16px', textAlign: 'left', fontSize: '12px', color: 'var(--text-slate-400)' }}>USER EMAIL</th>
-              <th style={{ padding: '14px 16px', textAlign: 'left', fontSize: '12px', color: 'var(--text-slate-400)' }}>ROLE BADGE</th>
-              <th style={{ padding: '14px 16px', textAlign: 'left', fontSize: '12px', color: 'var(--text-slate-400)' }}>ASSIGNED BRANCH</th>
-              <th style={{ padding: '14px 16px', textAlign: 'left', fontSize: '12px', color: 'var(--text-slate-400)' }}>CREATED DATE</th>
-              <th style={{ padding: '14px 16px', textAlign: 'center', fontSize: '12px', color: 'var(--text-slate-400)' }}>ACTIONS</th>
+            <tr>
+              <th>USER EMAIL</th>
+              <th>ROLE BADGE</th>
+              <th>ASSIGNED BRANCH</th>
+              <th>CREATED DATE</th>
+              <th style={{ textAlign: 'center' }}>ACTIONS</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan="5" style={{ padding: '32px', textAlign: 'center', color: '#94a3b8' }}>
+                <td colSpan="5" style={{ padding: '36px', textAlign: 'center', color: 'var(--text-slate-400)' }}>
                   Loading dashboard users...
                 </td>
               </tr>
             ) : filteredUsers.length === 0 ? (
               <tr>
-                <td colSpan="5" style={{ padding: '32px', textAlign: 'center', color: '#94a3b8' }}>
+                <td colSpan="5" style={{ padding: '36px', textAlign: 'center', color: 'var(--text-slate-400)' }}>
                   No dashboard users found. Click "Create New Dashboard User" to add one.
                 </td>
               </tr>
@@ -276,16 +302,16 @@ export default function UserManagementView() {
               filteredUsers.map((u) => {
                 const roleConf = ROLE_CONFIG[u.role] || { label: u.role?.toUpperCase(), bg: '#334155', color: '#fff' };
                 return (
-                  <tr key={u.id} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.04)' }}>
-                    <td style={{ padding: '14px 16px', fontWeight: '700', color: 'var(--text-slate-100)' }}>
+                  <tr key={u.id}>
+                    <td style={{ fontWeight: '700', color: 'var(--text-white)' }}>
                       {u.email}
                     </td>
-                    <td style={{ padding: '14px 16px' }}>
+                    <td>
                       <span style={{
                         display: 'inline-block',
-                        padding: '4px 10px',
+                        padding: '5px 12px',
                         borderRadius: '50px',
-                        fontSize: '10px',
+                        fontSize: '10.5px',
                         fontWeight: '800',
                         background: roleConf.bg,
                         color: roleConf.color,
@@ -294,31 +320,32 @@ export default function UserManagementView() {
                         {roleConf.label}
                       </span>
                     </td>
-                    <td style={{ padding: '14px 16px', fontSize: '13px', color: 'var(--text-slate-300)' }}>
+                    <td style={{ fontSize: '13px', color: 'var(--text-slate-200)' }}>
                       {u.branch}
                     </td>
-                    <td style={{ padding: '14px 16px', fontSize: '12px', color: 'var(--text-slate-400)' }}>
+                    <td style={{ fontSize: '12.5px', color: 'var(--text-slate-400)' }}>
                       {u.createdAt ? new Date(u.createdAt).toLocaleDateString() : 'System Default'}
                     </td>
-                    <td style={{ padding: '14px 16px', textAlign: 'center' }}>
+                    <td style={{ textAlign: 'center' }}>
                       <div style={{ display: 'flex', justifyContent: 'center', gap: '8px' }}>
                         <button
                           onClick={() => openEditModal(u)}
                           title="Edit User / Reset Password"
                           style={{
-                            padding: '6px 10px',
-                            background: 'rgba(59, 130, 246, 0.1)',
-                            border: '1px solid rgba(59, 130, 246, 0.25)',
+                            padding: '7px 12px',
+                            background: 'rgba(2, 132, 199, 0.1)',
+                            border: '1px solid rgba(2, 132, 199, 0.25)',
                             borderRadius: '8px',
-                            color: '#60a5fa',
+                            color: 'var(--blue-primary)',
                             cursor: 'pointer',
                             display: 'flex',
                             alignItems: 'center',
-                            gap: '4px',
-                            fontSize: '12px'
+                            gap: '5px',
+                            fontSize: '12px',
+                            fontWeight: '700'
                           }}
                         >
-                          <Edit3 size={13} />
+                          <Edit3 size={14} />
                           <span>Edit</span>
                         </button>
 
@@ -326,19 +353,20 @@ export default function UserManagementView() {
                           onClick={() => handleDeleteUser(u.id, u.email)}
                           title="Delete User"
                           style={{
-                            padding: '6px 10px',
-                            background: 'rgba(239, 68, 68, 0.1)',
-                            border: '1px solid rgba(239, 68, 68, 0.25)',
+                            padding: '7px 12px',
+                            background: 'rgba(225, 29, 72, 0.1)',
+                            border: '1px solid rgba(225, 29, 72, 0.25)',
                             borderRadius: '8px',
-                            color: '#f87171',
+                            color: 'var(--rose-primary)',
                             cursor: 'pointer',
                             display: 'flex',
                             alignItems: 'center',
-                            gap: '4px',
-                            fontSize: '12px'
+                            gap: '5px',
+                            fontSize: '12px',
+                            fontWeight: '700'
                           }}
                         >
-                          <Trash2 size={13} />
+                          <Trash2 size={14} />
                           <span>Delete</span>
                         </button>
                       </div>
@@ -356,7 +384,7 @@ export default function UserManagementView() {
         <div style={{
           position: 'fixed',
           inset: 0,
-          background: 'rgba(0, 0, 0, 0.75)',
+          background: 'rgba(15, 23, 42, 0.65)',
           backdropFilter: 'blur(4px)',
           display: 'flex',
           alignItems: 'center',
@@ -365,13 +393,13 @@ export default function UserManagementView() {
           padding: '16px'
         }}>
           <div style={{
-            background: 'var(--bg-slate-900, #0f172a)',
-            border: '1px solid var(--border-slate-800, #1e293b)',
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border-color)',
             borderRadius: '20px',
             width: '100%',
-            maxWidth: '460px',
-            padding: '28px',
-            boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)',
+            maxWidth: '480px',
+            padding: '30px',
+            boxShadow: 'var(--shadow-hover)',
             position: 'relative'
           }}>
             
@@ -383,24 +411,25 @@ export default function UserManagementView() {
                 right: '20px',
                 background: 'none',
                 border: 'none',
-                color: '#94a3b8',
-                cursor: 'pointer'
+                color: 'var(--text-slate-400)',
+                cursor: 'pointer',
+                padding: '4px'
               }}
             >
               <X size={20} />
             </button>
 
-            <h3 style={{ fontSize: '18px', fontWeight: '800', color: 'var(--text-slate-100)', marginTop: 0, marginBottom: '6px' }}>
+            <h3 style={{ fontSize: '18px', fontWeight: '800', color: 'var(--text-white)', marginTop: 0, marginBottom: '6px' }}>
               {editingUser ? 'Edit User / Reset Password' : 'Create New Dashboard User'}
             </h3>
-            <p style={{ fontSize: '12px', color: 'var(--text-slate-400)', marginTop: 0, marginBottom: '20px' }}>
+            <p style={{ fontSize: '12.5px', color: 'var(--text-slate-400)', marginTop: 0, marginBottom: '22px' }}>
               Enter email, password, and assign role permissions.
             </p>
 
-            <form onSubmit={handleFormSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <form onSubmit={handleFormSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
               
               <div>
-                <label style={{ display: 'block', fontSize: '11px', fontWeight: '800', color: 'var(--text-slate-300)', marginBottom: '6px', textTransform: 'uppercase' }}>
+                <label style={{ display: 'block', fontSize: '11.5px', fontWeight: '800', color: 'var(--text-slate-200)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                   USER EMAIL ADDRESS
                 </label>
                 <input
@@ -411,12 +440,12 @@ export default function UserManagementView() {
                   placeholder="e.g. user@thoughtflows.in"
                   style={{
                     width: '100%',
-                    padding: '10px 12px',
-                    background: 'var(--bg-slate-950, #020617)',
-                    border: '1px solid var(--border-slate-800, #1e293b)',
+                    padding: '11px 14px',
+                    background: 'var(--bg-input)',
+                    border: '1px solid var(--border-color)',
                     borderRadius: '10px',
-                    color: '#fff',
-                    fontSize: '13px',
+                    color: 'var(--text-white)',
+                    fontSize: '13.5px',
                     outline: 'none',
                     boxSizing: 'border-box'
                   }}
@@ -424,7 +453,7 @@ export default function UserManagementView() {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '11px', fontWeight: '800', color: 'var(--text-slate-300)', marginBottom: '6px', textTransform: 'uppercase' }}>
+                <label style={{ display: 'block', fontSize: '11.5px', fontWeight: '800', color: 'var(--text-slate-200)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                   {editingUser ? 'NEW PASSWORD (LEAVE BLANK TO KEEP CURRENT)' : 'PASSWORD'}
                 </label>
                 <input
@@ -435,12 +464,12 @@ export default function UserManagementView() {
                   placeholder={editingUser ? 'Enter new password if resetting...' : 'Set initial password...'}
                   style={{
                     width: '100%',
-                    padding: '10px 12px',
-                    background: 'var(--bg-slate-950, #020617)',
-                    border: '1px solid var(--border-slate-800, #1e293b)',
+                    padding: '11px 14px',
+                    background: 'var(--bg-input)',
+                    border: '1px solid var(--border-color)',
                     borderRadius: '10px',
-                    color: '#fff',
-                    fontSize: '13px',
+                    color: 'var(--text-white)',
+                    fontSize: '13.5px',
                     outline: 'none',
                     boxSizing: 'border-box'
                   }}
@@ -448,7 +477,7 @@ export default function UserManagementView() {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '11px', fontWeight: '800', color: 'var(--text-slate-300)', marginBottom: '6px', textTransform: 'uppercase' }}>
+                <label style={{ display: 'block', fontSize: '11.5px', fontWeight: '800', color: 'var(--text-slate-200)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                   ASSIGNED DASHBOARD ROLE
                 </label>
                 <select
@@ -456,12 +485,12 @@ export default function UserManagementView() {
                   onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                   style={{
                     width: '100%',
-                    padding: '10px 12px',
-                    background: 'var(--bg-slate-950, #020617)',
-                    border: '1px solid var(--border-slate-800, #1e293b)',
+                    padding: '11px 14px',
+                    background: 'var(--bg-input)',
+                    border: '1px solid var(--border-color)',
                     borderRadius: '10px',
-                    color: '#fff',
-                    fontSize: '13px',
+                    color: 'var(--text-white)',
+                    fontSize: '13.5px',
                     outline: 'none',
                     boxSizing: 'border-box'
                   }}
@@ -475,7 +504,7 @@ export default function UserManagementView() {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '11px', fontWeight: '800', color: 'var(--text-slate-300)', marginBottom: '6px', textTransform: 'uppercase' }}>
+                <label style={{ display: 'block', fontSize: '11.5px', fontWeight: '800', color: 'var(--text-slate-200)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                   ASSIGNED BRANCH
                 </label>
                 <select
@@ -483,12 +512,12 @@ export default function UserManagementView() {
                   onChange={(e) => setFormData({ ...formData, branch: e.target.value })}
                   style={{
                     width: '100%',
-                    padding: '10px 12px',
-                    background: 'var(--bg-slate-950, #020617)',
-                    border: '1px solid var(--border-slate-800, #1e293b)',
+                    padding: '11px 14px',
+                    background: 'var(--bg-input)',
+                    border: '1px solid var(--border-color)',
                     borderRadius: '10px',
-                    color: '#fff',
-                    fontSize: '13px',
+                    color: 'var(--text-white)',
+                    fontSize: '13.5px',
                     outline: 'none',
                     boxSizing: 'border-box'
                   }}
@@ -499,17 +528,17 @@ export default function UserManagementView() {
                 </select>
               </div>
 
-              <div style={{ display: 'flex', gap: '10px', marginTop: '12px' }}>
+              <div style={{ display: 'flex', gap: '12px', marginTop: '12px' }}>
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
                   style={{
                     flex: 1,
                     padding: '12px',
-                    background: 'transparent',
-                    border: '1px solid var(--border-slate-800, #1e293b)',
+                    background: 'var(--bg-input)',
+                    border: '1px solid var(--border-color)',
                     borderRadius: '10px',
-                    color: '#94a3b8',
+                    color: 'var(--text-slate-200)',
                     fontWeight: '700',
                     cursor: 'pointer'
                   }}

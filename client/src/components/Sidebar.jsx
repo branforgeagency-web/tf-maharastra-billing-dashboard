@@ -142,20 +142,22 @@ export default function Sidebar({ isMobileOpen, onCloseMobile }) {
       {/* Role Access Banner */}
       <div style={{
         margin: '0 12px 12px 12px',
-        padding: '8px 12px',
-        background: 'rgba(255, 255, 255, 0.04)',
-        border: '1px solid rgba(255, 255, 255, 0.08)',
+        padding: '10px 14px',
+        background: 'var(--bg-input)',
+        border: '1px solid var(--border-color)',
         borderRadius: '12px',
         display: 'flex',
         flexDirection: 'column',
-        gap: '4px'
+        gap: '6px'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span style={{ fontSize: '10px', color: '#94a3b8', fontWeight: '700', textTransform: 'uppercase' }}>Active Role</span>
+          <span style={{ fontSize: '10px', color: 'var(--text-slate-400)', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            Active Role
+          </span>
           <span style={{
-            padding: '2px 8px',
+            padding: '3px 9px',
             borderRadius: '50px',
-            fontSize: '9px',
+            fontSize: '9.5px',
             fontWeight: '800',
             background: activeRoleBadge.bg,
             color: activeRoleBadge.color
@@ -163,7 +165,7 @@ export default function Sidebar({ isMobileOpen, onCloseMobile }) {
             {activeRoleBadge.label}
           </span>
         </div>
-        <span style={{ fontSize: '11px', color: '#e2e8f0', fontWeight: '600', wordBreak: 'break-all' }}>
+        <span style={{ fontSize: '11.5px', color: 'var(--text-white)', fontWeight: '700', wordBreak: 'break-all' }}>
           {user?.email || 'Logged In User'}
         </span>
       </div>
