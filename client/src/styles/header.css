@@ -1,0 +1,214 @@
+@import './theme.css';
+
+.header-left-flex {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.mobile-hamburger-btn {
+  display: none;
+  background: var(--bg-input);
+  border: 1.5px solid var(--border-color);
+  color: var(--text-white);
+  padding: 8px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .mobile-hamburger-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+/* Prominent Official Navbar Logo Styling */
+.header-logo-badge {
+  background: #ffffff;
+  padding: 5px 14px;
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 14px rgba(0, 137, 123, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid #cbd5e1;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.header-logo-badge:hover {
+  transform: scale(1.03);
+}
+
+.header-logo-img {
+  height: 38px;
+  width: auto;
+  object-fit: contain;
+}
+
+@media (max-width: 640px) {
+  .header-logo-badge {
+    padding: 4px 10px;
+  }
+  .header-logo-img {
+    height: 30px;
+  }
+}
+
+@media (max-width: 420px) {
+  .header-logo-img {
+    height: 26px;
+  }
+}
+
+.header-branch-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-branch-label {
+  font-size: 12px;
+  color: var(--text-slate-400);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+@media (max-width: 768px) {
+  .header-branch-label span {
+    display: none;
+  }
+}
+
+.header-branch-select {
+  background-color: var(--bg-input);
+  border: 1.5px solid rgba(0, 137, 123, 0.4);
+  color: var(--tf-teal-primary);
+  font-weight: 800;
+  font-size: 12px;
+  padding: 7px 12px;
+  border-radius: var(--radius-md);
+  outline: none;
+  cursor: pointer;
+  max-width: 200px;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 520px) {
+  .header-branch-select {
+    max-width: 130px;
+    padding: 5px 8px;
+    font-size: 11px;
+  }
+}
+
+.header-right-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Theme Toggle Button */
+.theme-toggle-btn {
+  background: var(--bg-input);
+  border: 1.5px solid var(--border-color);
+  color: var(--text-slate-200);
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  transition: all 0.2s ease;
+}
+
+.theme-toggle-btn:hover {
+  background-color: var(--bg-card-hover);
+  border-color: var(--tf-teal-primary);
+}
+
+/* Billing Status Indicator Badge */
+.header-billing-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: rgba(0, 137, 123, 0.1);
+  border: 1.5px solid rgba(0, 137, 123, 0.35);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--tf-teal-primary);
+  cursor: pointer;
+}
+
+@media (max-width: 640px) {
+  .header-billing-badge {
+    display: none;
+  }
+}
+
+.billing-dot-live {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: var(--tf-teal-primary);
+  box-shadow: 0 0 8px var(--tf-teal-primary);
+}
+
+/* User Profile Badge */
+.header-user-profile {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px 4px 4px;
+  background-color: var(--bg-input);
+  border: 1.5px solid var(--border-color);
+  border-radius: 24px;
+}
+
+.user-avatar-circle {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--tf-teal-primary), var(--tf-teal-dark));
+  color: #ffffff;
+  font-weight: 900;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 860px) {
+  .user-details {
+    display: none;
+  }
+}
+
+@media (max-width: 520px) {
+  .hide-mobile-text {
+    display: none;
+  }
+  .header-new-receipt-btn {
+    padding: 8px 10px !important;
+  }
+}
+
+.user-name {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--text-white);
+  line-height: 1.1;
+}
+
+.user-role {
+  font-size: 9px;
+  color: var(--tf-teal-primary);
+  font-weight: 700;
+}

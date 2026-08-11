@@ -1,0 +1,23 @@
+[
+  {
+    "_id": "6a7a83e03ba06b5aa8b31d7c",
+    "branchCode": "Pune (FC Road) ★",
+    "voucherNo": "VOUCH/PN/2026/2735",
+    "voucherDate": "2026-08-11",
+    "category": "Office Utilities — Water Supply",
+    "title": "sv",
+    "payeeVendor": "sfv",
+    "invoiceRef": "sf ",
+    "notes": "sv",
+    "amount": 100,
+    "hasGst": false,
+    "baseAmount": 100,
+    "gstAmount": 0,
+    "party": "Management",
+    "account": "Cash",
+    "isCapitalAsset": false,
+    "createdAt": "2026-08-11T02:07:28.272Z",
+    "updatedAt": "2026-08-11T02:07:28.272Z",
+    "__v": 0
+  }
+]

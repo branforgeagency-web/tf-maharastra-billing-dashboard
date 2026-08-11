@@ -1,0 +1,138 @@
+@import './theme.css';
+
+/* Data Table Styling */
+.portal-table-container {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  overflow-x: auto;
+  box-shadow: var(--shadow-card);
+  -webkit-overflow-scrolling: touch;
+}
+
+.portal-data-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 13px;
+  min-width: 680px;
+}
+
+.portal-data-table th {
+  background-color: var(--bg-input);
+  color: var(--text-slate-400);
+  font-weight: 800;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--border-color);
+  white-space: nowrap;
+}
+
+.portal-data-table td {
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-white);
+  vertical-align: middle;
+}
+
+.portal-data-table tr:hover {
+  background-color: var(--bg-card-hover);
+}
+
+/* Badge Pills */
+.badge-pill {
+  padding: 4px 10px;
+  border-radius: 14px;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  display: inline-block;
+}
+
+.badge-paid { background: rgba(0, 137, 123, 0.12); color: #00897b; border: 1px solid rgba(0, 137, 123, 0.3); }
+.badge-partial { background: rgba(245, 158, 11, 0.12); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); }
+.badge-pending { background: rgba(244, 63, 94, 0.12); color: #f43f5e; border: 1px solid rgba(244, 63, 94, 0.3); }
+
+/* Quick Action Buttons */
+.action-btn {
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  color: var(--text-white);
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.action-btn:hover {
+  background-color: var(--bg-card-hover);
+  border-color: var(--tf-teal-primary);
+  color: var(--tf-teal-primary);
+  transform: translateY(-1.5px);
+  box-shadow: 0 4px 12px rgba(0, 137, 123, 0.15);
+}
+
+.action-btn:active {
+  transform: scale(0.98);
+}
+
+.action-btn-wa {
+  background: rgba(0, 137, 123, 0.12);
+  border-color: rgba(0, 137, 123, 0.3);
+  color: #00897b;
+}
+
+.action-btn-wa:hover {
+  background: rgba(0, 137, 123, 0.25);
+  color: #004d40;
+}
+
+.action-btn-call {
+  background: rgba(2, 132, 199, 0.12);
+  border-color: rgba(2, 132, 199, 0.3);
+  color: #0284c7;
+}
+
+/* Primary Button (Thoughtflows Official Teal Brand Button) */
+.btn-primary-green {
+  background: linear-gradient(135deg, #00897b 0%, #004d40 100%);
+  color: #ffffff !important;
+  font-weight: 800;
+  font-size: 13px;
+  padding: 10px 20px;
+  border-radius: var(--radius-md);
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 16px rgba(0, 137, 123, 0.35);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-primary-green:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 137, 123, 0.45);
+  background: linear-gradient(135deg, #00796b 0%, #00332c 100%);
+}
+
+.btn-primary-green:active {
+  transform: scale(0.97);
+}
+
+/* GST & ITR Calculator Card */
+.gst-calculator-card {
+  background: linear-gradient(135deg, rgba(0, 137, 123, 0.08), var(--bg-card));
+  border: 1px solid rgba(0, 137, 123, 0.3);
+  border-radius: var(--radius-lg);
+  padding: 22px;
+  box-shadow: var(--shadow-card);
+}

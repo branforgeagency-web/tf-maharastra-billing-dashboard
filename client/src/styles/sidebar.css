@@ -1,0 +1,206 @@
+@import './theme.css';
+
+.sidebar-header {
+  padding: 18px 18px;
+  border-bottom: 1.5px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--bg-sidebar);
+}
+
+.sidebar-brand-badge-container {
+  background: #ffffff;
+  padding: 8px 14px;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 18px rgba(0, 137, 123, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  border: 1.5px solid #cbd5e1;
+  transition: transform 0.25s ease;
+}
+
+.sidebar-brand-badge-container:hover {
+  transform: scale(1.02);
+}
+
+.sidebar-logo-img {
+  height: 36px;
+  width: auto;
+  object-fit: contain;
+}
+
+.sidebar-mobile-close {
+  display: none;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  color: var(--text-white);
+  padding: 6px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+@media (max-width: 768px) {
+  .sidebar-mobile-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+/* Scrollable Container */
+.sidebar-nav-list {
+  padding: 16px 12px;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ==========================================================================
+   CREATIVE 3D SQUIRCLE SIDEBAR BUTTON CARDS
+   ========================================================================== */
+
+@keyframes slideInSidebarItem {
+  0% {
+    opacity: 0;
+    transform: translateX(-16px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+.animate-sidebar-item {
+  animation: slideInSidebarItem 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Creative Sidebar Button Item */
+.sidebar-card-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 14px;
+  border-radius: 18px;
+  background-color: var(--bg-card);
+  border: 1.5px solid var(--border-color);
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+}
+
+/* Hover State - Spring Slide Right & Glow */
+.sidebar-card-item:hover {
+  transform: translateX(5px) scale(1.01);
+  border-color: var(--tf-teal-primary);
+  background-color: var(--bg-card-hover);
+  box-shadow: 0 8px 24px rgba(0, 137, 123, 0.15);
+}
+
+/* Active State - Glowing Pulsing Accent Bar & HSL Aura */
+.sidebar-card-item.active {
+  border-color: var(--tf-teal-primary);
+  background: linear-gradient(90deg, rgba(0, 137, 123, 0.12) 0%, var(--bg-card) 100%);
+  box-shadow: 0 6px 24px rgba(0, 137, 123, 0.2);
+  transform: translateX(4px);
+}
+
+[data-theme="dark"] .sidebar-card-item.active {
+  background: linear-gradient(90deg, rgba(0, 137, 123, 0.22) 0%, rgba(12, 32, 36, 0.95) 100%);
+}
+
+/* Glowing Left Active Pill Indicator */
+.sidebar-card-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 18%;
+  bottom: 18%;
+  width: 4px;
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+  background: var(--tf-teal-primary);
+  box-shadow: 0 0 12px var(--tf-teal-primary);
+}
+
+/* Glowing 3D Squircle Icon Badge Box */
+.sidebar-card-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), filter 0.3s ease, box-shadow 0.3s ease;
+}
+
+.sidebar-card-item:hover .sidebar-card-icon {
+  transform: translateY(-2px) scale(1.1) rotate(3deg);
+  filter: brightness(1.15);
+}
+
+.sidebar-card-item.active .sidebar-card-icon {
+  transform: scale(1.08);
+}
+
+/* Card Text Styling */
+.sidebar-card-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.sidebar-card-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text-white);
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.2s ease;
+}
+
+.sidebar-card-item.active .sidebar-card-title {
+  color: var(--tf-teal-primary);
+}
+
+.sidebar-card-subtitle {
+  font-size: 10.5px;
+  color: var(--text-slate-400);
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Chevron Slide Arrow */
+.sidebar-card-arrow {
+  color: var(--text-slate-500);
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: all 0.25s ease;
+}
+
+.sidebar-card-item:hover .sidebar-card-arrow {
+  opacity: 1;
+  transform: translateX(0);
+  color: var(--tf-teal-primary);
+}
+
+.sidebar-card-item.active .sidebar-card-arrow {
+  opacity: 1;
+  transform: translateX(0);
+  color: var(--tf-teal-primary);
+}

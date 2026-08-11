@@ -1,0 +1,33 @@
+[
+  {
+    "_id": "6a7a81e5cb8494d9ad026f15",
+    "branchCode": "Pune",
+    "receiptNo": "TF/PN/2026/1001",
+    "dateOfReceipt": "2026-08-11",
+    "receiptCategory": "College Revenue",
+    "paymentType": "New Fee",
+    "studentName": "dharsin",
+    "cellNumber": "9999999999",
+    "email": "dharsin0201@gmail.com",
+    "address": "aaa coimbatore",
+    "paidBranch": "Pune (FC Road) ★",
+    "course": "CIC Fast Track — ₹10,000",
+    "modeOfTraining": "Offline",
+    "leadGeneratedBy": "",
+    "leadBranch": "Pune (FC Road) ★",
+    "courseFee": 10000,
+    "taxableValue": 8474.58,
+    "gstAmount": 1525.42,
+    "installmentPlan": "Full payment",
+    "installmentNumber": "Installment 1",
+    "amountPayingNow": 10000,
+    "previouslyPaid": 0,
+    "pendingBalance": 0,
+    "party": "Management",
+    "account": "IDFC Main",
+    "status": "Paid",
+    "createdAt": "2026-08-11T01:59:01.089Z",
+    "updatedAt": "2026-08-11T01:59:01.089Z",
+    "__v": 0
+  }
+]
