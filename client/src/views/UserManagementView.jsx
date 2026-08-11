@@ -1,19 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Users, UserPlus, Edit3, Trash2, Key, Shield, 
-  Search, CheckCircle, AlertCircle, RefreshCw, X 
+  Search, CheckCircle, AlertCircle, RefreshCw, X, Eye, EyeOff, Globe, Building
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const ROLE_CONFIG = {
-  bb_admin: { label: 'MANAGEMENT (BB ADMIN)', bg: '#16213e', color: '#fff' },
-  operations_head: { label: 'OPERATIONS HEAD', bg: '#6b21a8', color: '#fff' },
-  department_head: { label: 'DEPARTMENT HEAD', bg: '#b45309', color: '#fff' },
-  finance_manager: { label: 'FINANCE MANAGER', bg: '#0d9488', color: '#fff' },
-  branch_head: { label: 'BRANCH HEAD', bg: '#cff4fc', color: '#087990' },
-  admin: { label: 'ADMIN', bg: '#16213e', color: '#fff' },
-  management: { label: 'MANAGEMENT', bg: '#0284c7', color: '#fff' },
+  bb_admin: { label: 'MANAGEMENT (BB ADMIN)', bg: '#16213e', color: '#fff', isGlobal: true },
+  operations_head: { label: 'OPERATIONS HEAD', bg: '#6b21a8', color: '#fff', isGlobal: true },
+  department_head: { label: 'DEPARTMENT HEAD', bg: '#b45309', color: '#fff', isGlobal: true },
+  finance_manager: { label: 'FINANCE MANAGER', bg: '#0d9488', color: '#fff', isGlobal: true },
+  branch_head: { label: 'BRANCH HEAD', bg: '#cff4fc', color: '#087990', isGlobal: false },
+  admin: { label: 'ADMIN', bg: '#16213e', color: '#fff', isGlobal: true },
+  management: { label: 'MANAGEMENT', bg: '#0284c7', color: '#fff', isGlobal: true },
 };
+
+const GLOBAL_ROLES = ['bb_admin', 'operations_head', 'admin', 'department_head', 'finance_manager', 'management'];
 
 const BRANCH_OPTIONS = [
   'Pune (FC Road) ★',
@@ -30,6 +32,7 @@ export default function UserManagementView() {
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
+  const [showPasswordInModal, setShowPasswordInModal] = useState(false);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -67,6 +70,7 @@ export default function UserManagementView() {
 
   const openCreateModal = () => {
     setEditingUser(null);
+    setShowPasswordInModal(false);
     setFormData({
       email: '',
       password: '',
@@ -78,13 +82,26 @@ export default function UserManagementView() {
 
   const openEditModal = (user) => {
     setEditingUser(user);
+    setShowPasswordInModal(false);
+    const userRole = user.role || 'branch_head';
+    const isGlobal = GLOBAL_ROLES.includes(userRole);
+
     setFormData({
       email: user.email,
-      password: '',
-      role: user.role || 'branch_head',
-      branch: user.branch || 'Pune (FC Road) ★',
+      password: '', // Blank unless resetting
+      role: userRole,
+      branch: isGlobal ? 'All Branches (Global View)' : (user.branch || 'Pune (FC Road) ★'),
     });
     setIsModalOpen(true);
+  };
+
+  const handleRoleChange = (newRole) => {
+    const isGlobal = GLOBAL_ROLES.includes(newRole);
+    setFormData({
+      ...formData,
+      role: newRole,
+      branch: isGlobal ? 'All Branches (Global View)' : (formData.branch === 'All Branches (Global View)' ? 'Pune (FC Road) ★' : formData.branch)
+    });
   };
 
   const handleFormSubmit = async (e) => {
@@ -101,6 +118,13 @@ export default function UserManagementView() {
     setFormSubmitting(true);
     setStatusMsg({ type: '', text: '' });
 
+    // Final payload sanitization
+    const isGlobal = GLOBAL_ROLES.includes(formData.role);
+    const payload = {
+      ...formData,
+      branch: isGlobal ? 'All Branches (Global View)' : formData.branch
+    };
+
     try {
       const url = editingUser ? `/api/users/${editingUser.id}` : '/api/users';
       const method = editingUser ? 'PUT' : 'POST';
@@ -111,7 +135,7 @@ export default function UserManagementView() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
@@ -121,7 +145,9 @@ export default function UserManagementView() {
 
       setStatusMsg({
         type: 'success',
-        text: editingUser ? `User ${formData.email} updated successfully.` : `New dashboard user ${formData.email} created!`
+        text: editingUser 
+          ? `User ${formData.email} updated successfully${formData.password ? ' (password reset)' : ''}.` 
+          : `New dashboard user ${formData.email} created!`
       });
 
       setIsModalOpen(false);
@@ -157,6 +183,8 @@ export default function UserManagementView() {
     u.role?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     u.branch?.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const isCurrentFormRoleGlobal = GLOBAL_ROLES.includes(formData.role);
 
   return (
     <div className="portal-module-container animate-fade-in" style={{ padding: '24px' }}>
@@ -195,7 +223,7 @@ export default function UserManagementView() {
             </h1>
           </div>
           <p style={{ fontSize: '13.5px', color: 'var(--text-slate-400)', margin: 0, fontWeight: '500' }}>
-            Create and edit dashboard user accounts, reset passwords, and assign role privileges.
+            Create, edit, reset passwords for any dashboard user (including Admin & Sub-Admin accounts).
           </p>
         </div>
 
@@ -300,7 +328,7 @@ export default function UserManagementView() {
               </tr>
             ) : (
               filteredUsers.map((u) => {
-                const roleConf = ROLE_CONFIG[u.role] || { label: u.role?.toUpperCase(), bg: '#334155', color: '#fff' };
+                const roleConf = ROLE_CONFIG[u.role] || { label: u.role?.toUpperCase(), bg: '#334155', color: '#fff', isGlobal: true };
                 return (
                   <tr key={u.id}>
                     <td style={{ fontWeight: '700', color: 'var(--text-white)' }}>
@@ -321,7 +349,17 @@ export default function UserManagementView() {
                       </span>
                     </td>
                     <td style={{ fontSize: '13px', color: 'var(--text-slate-200)' }}>
-                      {u.branch}
+                      {roleConf.isGlobal ? (
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', color: '#0284c7', fontWeight: '600' }}>
+                          <Globe size={13} />
+                          <span>All Branches (Global View)</span>
+                        </span>
+                      ) : (
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                          <Building size={13} className="text-emerald-500" />
+                          <span>{u.branch}</span>
+                        </span>
+                      )}
                     </td>
                     <td style={{ fontSize: '12.5px', color: 'var(--text-slate-400)' }}>
                       {u.createdAt ? new Date(u.createdAt).toLocaleDateString() : 'System Default'}
@@ -346,7 +384,7 @@ export default function UserManagementView() {
                           }}
                         >
                           <Edit3 size={14} />
-                          <span>Edit</span>
+                          <span>Edit / Password</span>
                         </button>
 
                         <button
@@ -420,10 +458,10 @@ export default function UserManagementView() {
             </button>
 
             <h3 style={{ fontSize: '18px', fontWeight: '800', color: 'var(--text-white)', marginTop: 0, marginBottom: '6px' }}>
-              {editingUser ? 'Edit User / Reset Password' : 'Create New Dashboard User'}
+              {editingUser ? `Edit User: ${editingUser.email}` : 'Create New Dashboard User'}
             </h3>
             <p style={{ fontSize: '12.5px', color: 'var(--text-slate-400)', marginTop: 0, marginBottom: '22px' }}>
-              Enter email, password, and assign role permissions.
+              Modify account email, role privileges, or set a new password.
             </p>
 
             <form onSubmit={handleFormSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
@@ -453,15 +491,25 @@ export default function UserManagementView() {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '11.5px', fontWeight: '800', color: 'var(--text-slate-200)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  {editingUser ? 'NEW PASSWORD (LEAVE BLANK TO KEEP CURRENT)' : 'PASSWORD'}
-                </label>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                  <label style={{ fontSize: '11.5px', fontWeight: '800', color: 'var(--text-slate-200)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    {editingUser ? 'NEW PASSWORD (LEAVE BLANK TO KEEP CURRENT)' : 'PASSWORD'}
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setShowPasswordInModal(!showPasswordInModal)}
+                    style={{ background: 'none', border: 'none', color: '#0d9488', fontSize: '12px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+                  >
+                    {showPasswordInModal ? <EyeOff size={13} /> : <Eye size={13} />}
+                    <span>{showPasswordInModal ? 'Hide' : 'Show'}</span>
+                  </button>
+                </div>
                 <input
-                  type="password"
+                  type={showPasswordInModal ? 'text' : 'password'}
                   required={!editingUser}
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  placeholder={editingUser ? 'Enter new password if resetting...' : 'Set initial password...'}
+                  placeholder={editingUser ? 'Type new password to reset...' : 'Set initial account password...'}
                   style={{
                     width: '100%',
                     padding: '11px 14px',
@@ -482,7 +530,7 @@ export default function UserManagementView() {
                 </label>
                 <select
                   value={formData.role}
-                  onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                  onChange={(e) => handleRoleChange(e.target.value)}
                   style={{
                     width: '100%',
                     padding: '11px 14px',
@@ -495,38 +543,59 @@ export default function UserManagementView() {
                     boxSizing: 'border-box'
                   }}
                 >
-                  <option value="bb_admin">MANAGEMENT (BB ADMIN)</option>
-                  <option value="operations_head">OPERATIONS HEAD</option>
+                  <option value="bb_admin">MANAGEMENT (BB ADMIN) — Full Admin</option>
+                  <option value="operations_head">OPERATIONS HEAD — Sub-Admin</option>
                   <option value="department_head">DEPARTMENT HEAD</option>
                   <option value="finance_manager">FINANCE MANAGER</option>
                   <option value="branch_head">BRANCH HEAD</option>
                 </select>
               </div>
 
-              <div>
-                <label style={{ display: 'block', fontSize: '11.5px', fontWeight: '800', color: 'var(--text-slate-200)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  ASSIGNED BRANCH
-                </label>
-                <select
-                  value={formData.branch}
-                  onChange={(e) => setFormData({ ...formData, branch: e.target.value })}
-                  style={{
-                    width: '100%',
-                    padding: '11px 14px',
-                    background: 'var(--bg-input)',
-                    border: '1px solid var(--border-color)',
-                    borderRadius: '10px',
-                    color: 'var(--text-white)',
-                    fontSize: '13.5px',
-                    outline: 'none',
-                    boxSizing: 'border-box'
-                  }}
-                >
-                  {BRANCH_OPTIONS.map(b => (
-                    <option key={b} value={b}>{b}</option>
-                  ))}
-                </select>
-              </div>
+              {/* Conditionally hide Branch dropdown for Admin / Sub-Admin / Global Roles */}
+              {isCurrentFormRoleGlobal ? (
+                <div style={{
+                  padding: '12px 14px',
+                  background: 'rgba(2, 132, 199, 0.08)',
+                  border: '1px solid rgba(2, 132, 199, 0.25)',
+                  borderRadius: '10px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  color: '#0284c7',
+                  fontSize: '12.5px',
+                  fontWeight: '600'
+                }}>
+                  <Globe size={18} className="shrink-0 text-sky-500" />
+                  <span>
+                    <strong>All Branches (Global View)</strong>: Admin & Sub-Admin roles automatically have global visibility across all 11 branches. Branch assignment is not applicable.
+                  </span>
+                </div>
+              ) : (
+                <div>
+                  <label style={{ display: 'block', fontSize: '11.5px', fontWeight: '800', color: 'var(--text-slate-200)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    ASSIGNED BRANCH
+                  </label>
+                  <select
+                    value={formData.branch}
+                    onChange={(e) => setFormData({ ...formData, branch: e.target.value })}
+                    style={{
+                      width: '100%',
+                      padding: '11px 14px',
+                      background: 'var(--bg-input)',
+                      border: '1px solid var(--border-color)',
+                      borderRadius: '10px',
+                      color: 'var(--text-white)',
+                      fontSize: '13.5px',
+                      outline: 'none',
+                      boxSizing: 'border-box'
+                    }}
+                  >
+                    {BRANCH_OPTIONS.filter(b => b !== 'All Branches (Global View)').map(b => (
+                      <option key={b} value={b}>{b}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               <div style={{ display: 'flex', gap: '12px', marginTop: '12px' }}>
                 <button
@@ -557,7 +626,7 @@ export default function UserManagementView() {
                     cursor: 'pointer'
                   }}
                 >
-                  {formSubmitting ? 'Saving...' : (editingUser ? 'Update User' : 'Create User')}
+                  {formSubmitting ? 'Saving...' : (editingUser ? 'Save & Update User' : 'Create User')}
                 </button>
               </div>
 
