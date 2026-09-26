@@ -23,6 +23,7 @@ export default function TopHeader({
     ? user.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
     : 'TF';
 
+
   return (
     <div className="portal-header-bar">
       

@@ -3,7 +3,7 @@
 .header-left-flex {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
 }
 
 .mobile-hamburger-btn {
@@ -27,18 +27,19 @@
 /* Prominent Official Navbar Logo Styling */
 .header-logo-badge {
   background: #ffffff;
-  padding: 5px 14px;
-  border-radius: var(--radius-md);
-  box-shadow: 0 4px 14px rgba(0, 137, 123, 0.15);
+  padding: 6px 16px;
+  border-radius: 14px;
+  box-shadow: 0 4px 18px rgba(0, 137, 123, 0.15);
   display: flex;
   align-items: center;
   justify-content: center;
   border: 1.5px solid #cbd5e1;
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
 }
 
 .header-logo-badge:hover {
   transform: scale(1.03);
+  box-shadow: 0 6px 22px rgba(0, 137, 123, 0.22);
 }
 
 .header-logo-img {
@@ -85,22 +86,23 @@
 
 .header-branch-select {
   background-color: var(--bg-input);
-  border: 1.5px solid rgba(0, 137, 123, 0.4);
+  border: 1.5px solid var(--tf-teal-primary);
   color: var(--tf-teal-primary);
   font-weight: 800;
-  font-size: 12px;
-  padding: 7px 12px;
+  font-size: 12.5px;
+  padding: 8px 14px;
   border-radius: var(--radius-md);
   outline: none;
   cursor: pointer;
-  max-width: 200px;
+  max-width: 220px;
   text-overflow: ellipsis;
+  box-shadow: 0 2px 8px rgba(0, 137, 123, 0.08);
 }
 
 @media (max-width: 520px) {
   .header-branch-select {
     max-width: 130px;
-    padding: 5px 8px;
+    padding: 6px 10px;
     font-size: 11px;
   }
 }
@@ -108,7 +110,7 @@
 .header-right-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 /* Theme Toggle Button */
@@ -116,13 +118,13 @@
   background: var(--bg-input);
   border: 1.5px solid var(--border-color);
   color: var(--text-slate-200);
-  padding: 8px 12px;
+  padding: 8px 14px;
   border-radius: var(--radius-md);
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 11px;
+  font-size: 11.5px;
   font-weight: 800;
   transition: all 0.2s ease;
 }
@@ -130,18 +132,19 @@
 .theme-toggle-btn:hover {
   background-color: var(--bg-card-hover);
   border-color: var(--tf-teal-primary);
+  color: var(--tf-teal-primary);
 }
 
-/* Billing Status Indicator Badge */
+/* Billing Status Indicator Badge with Live Pulse Dot */
 .header-billing-badge {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   background-color: rgba(0, 137, 123, 0.1);
   border: 1.5px solid rgba(0, 137, 123, 0.35);
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 11px;
+  padding: 7px 14px;
+  border-radius: 50px;
+  font-size: 11.5px;
   font-weight: 800;
   color: var(--tf-teal-primary);
   cursor: pointer;
@@ -154,35 +157,37 @@
 }
 
 .billing-dot-live {
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background-color: var(--tf-teal-primary);
-  box-shadow: 0 0 8px var(--tf-teal-primary);
+  box-shadow: 0 0 10px var(--tf-teal-primary);
+  animation: pulseLiveDot 2s infinite;
 }
 
 /* User Profile Badge */
 .header-user-profile {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 4px 10px 4px 4px;
+  gap: 10px;
+  padding: 4px 12px 4px 4px;
   background-color: var(--bg-input);
   border: 1.5px solid var(--border-color);
-  border-radius: 24px;
+  border-radius: 50px;
 }
 
 .user-avatar-circle {
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--tf-teal-primary), var(--tf-teal-dark));
   color: #ffffff;
   font-weight: 900;
-  font-size: 11px;
+  font-size: 11.5px;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 3px 10px rgba(0, 137, 123, 0.3);
 }
 
 @media (max-width: 860px) {
@@ -201,14 +206,14 @@
 }
 
 .user-name {
-  font-size: 11px;
+  font-size: 11.5px;
   font-weight: 800;
   color: var(--text-white);
   line-height: 1.1;
 }
 
 .user-role {
-  font-size: 9px;
+  font-size: 9.5px;
   color: var(--tf-teal-primary);
   font-weight: 700;
 }

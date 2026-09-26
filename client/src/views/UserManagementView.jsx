@@ -11,11 +11,12 @@ const ROLE_CONFIG = {
   department_head: { label: 'DEPARTMENT HEAD', bg: 'linear-gradient(135deg, #7c2d12 0%, #ea580c 100%)', color: '#fff', isGlobal: true },
   finance_manager: { label: 'FINANCE MANAGER', bg: 'linear-gradient(135deg, #064e3b 0%, #0d9488 100%)', color: '#fff', isGlobal: true },
   branch_head: { label: 'BRANCH HEAD', bg: '#cff4fc', color: '#087990', isGlobal: false },
+  franchise_partner: { label: 'FRANCHISE PARTNERS', bg: 'linear-gradient(135deg, #0e7490 0%, #0891b2 100%)', color: '#fff', isGlobal: true },
   admin: { label: 'ADMIN', bg: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)', color: '#fff', isGlobal: true },
   management: { label: 'MANAGEMENT', bg: 'linear-gradient(135deg, #0369a1 0%, #0284c7 100%)', color: '#fff', isGlobal: true },
 };
 
-const GLOBAL_ROLES = ['bb_admin', 'operations_head', 'admin', 'department_head', 'finance_manager', 'management'];
+const GLOBAL_ROLES = ['bb_admin', 'operations_head', 'admin', 'department_head', 'finance_manager', 'franchise_partner', 'management'];
 
 const BRANCH_OPTIONS = [
   'Pune (FC Road) ★',
@@ -177,14 +178,32 @@ export default function UserManagementView() {
     }
   };
 
-  const filteredUsers = users.filter(u => 
-    u.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    u.role?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    u.branch?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const [activeTab, setActiveTab] = useState('all'); // 'all', 'franchise_partner', 'branch_head', 'admin'
 
+  const franchiseCount = users.filter(u => u.role === 'franchise_partner').length;
+  const branchUsersCount = users.filter(u => u.role === 'branch_head').length;
+  const adminUsersCount = users.filter(u => ['bb_admin', 'operations_head', 'department_head', 'finance_manager', 'admin', 'management'].includes(u.role)).length;
   const globalUsersCount = users.filter(u => GLOBAL_ROLES.includes(u.role)).length;
-  const branchUsersCount = users.length - globalUsersCount;
+
+  const filteredUsers = users.filter(u => {
+    const matchesSearch = 
+      u.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      u.role?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      u.branch?.toLowerCase().includes(searchQuery.toLowerCase());
+    if (!matchesSearch) return false;
+
+    if (activeTab === 'franchise_partner') {
+      return u.role === 'franchise_partner';
+    }
+    if (activeTab === 'branch_head') {
+      return u.role === 'branch_head';
+    }
+    if (activeTab === 'admin') {
+      return ['bb_admin', 'operations_head', 'department_head', 'finance_manager', 'admin', 'management'].includes(u.role);
+    }
+    return true;
+  });
+
   const isCurrentFormRoleGlobal = GLOBAL_ROLES.includes(formData.role);
 
   return (
@@ -305,6 +324,65 @@ export default function UserManagementView() {
           <span>{statusMsg.text}</span>
         </div>
       )}
+
+      {/* Role Filter Tabs */}
+      <div style={{ display: 'flex', gap: '8px', marginBottom: '18px', flexWrap: 'wrap' }}>
+        {[
+          { id: 'all', label: 'All Users', count: users.length, color: '#38bdf8' },
+          { id: 'franchise_partner', label: 'Franchise Partners', count: franchiseCount, color: '#06b6d4', badge: 'Exclusive MH' },
+          { id: 'branch_head', label: 'Branch Heads', count: branchUsersCount, color: '#10b981' },
+          { id: 'admin', label: 'Management & Admin', count: adminUsersCount, color: '#818cf8' },
+        ].map(t => {
+          const isActive = activeTab === t.id;
+          return (
+            <button
+              key={t.id}
+              onClick={() => setActiveTab(t.id)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 16px',
+                borderRadius: '12px',
+                fontSize: '13px',
+                fontWeight: '700',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                background: isActive ? 'linear-gradient(135deg, rgba(2, 132, 199, 0.2), rgba(15, 23, 42, 0.8))' : 'var(--bg-card)',
+                border: isActive ? `1.5px solid ${t.color}` : '1.5px solid var(--border-color)',
+                color: isActive ? '#fff' : 'var(--text-slate-400)',
+                boxShadow: isActive ? `0 4px 14px -2px rgba(6, 182, 212, 0.3)` : 'none'
+              }}
+            >
+              <span>{t.label}</span>
+              <span style={{
+                fontSize: '11px',
+                padding: '2px 8px',
+                borderRadius: '50px',
+                background: isActive ? t.color : 'rgba(255, 255, 255, 0.08)',
+                color: isActive ? '#0f172a' : 'var(--text-slate-300)',
+                fontWeight: '900'
+              }}>
+                {t.count}
+              </span>
+              {t.badge && (
+                <span style={{
+                  fontSize: '9.5px',
+                  padding: '2px 6px',
+                  borderRadius: '4px',
+                  background: 'rgba(6, 182, 212, 0.15)',
+                  color: '#38bdf8',
+                  fontWeight: '800',
+                  textTransform: 'uppercase',
+                  border: '1px solid rgba(6, 182, 212, 0.3)'
+                }}>
+                  {t.badge}
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
 
       {/* Search & Refresh Controls Bar */}
       <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
@@ -644,6 +722,7 @@ export default function UserManagementView() {
                   <option value="department_head">DEPARTMENT HEAD</option>
                   <option value="finance_manager">FINANCE MANAGER</option>
                   <option value="branch_head">BRANCH HEAD</option>
+                  <option value="franchise_partner">FRANCHISE PARTNERS (Career Vidyalaya & Nilanjan)</option>
                 </select>
               </div>
 

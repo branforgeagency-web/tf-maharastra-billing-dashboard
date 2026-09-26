@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Plus, FileSpreadsheet, Eye, Trash2, ArrowLeft, AlertTriangle, Edit, Calendar } from 'lucide-react';
+import { Search, Plus, FileSpreadsheet, Eye, Trash2, ArrowLeft, AlertTriangle, Edit, Calendar, ShieldCheck, Lock } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import CreateReceiptModal from '../components/CreateReceiptModal';
 import CreateVoucherModal from '../components/CreateVoucherModal';
 import ImportReceiptsModal from '../components/ImportReceiptsModal';
 import ReceiptViewModal from '../components/ReceiptViewModal';
 
 export default function IncomeExpenseView({ selectedBranch, setSelectedBranch }) {
+  const { user } = useAuth();
+  const isFranchise = user?.role === 'franchise_partner';
+
   const [subTab, setSubTab] = useState('receipts'); // 'receipts' | 'vouchers'
   const [voucherViewMode, setVoucherViewMode] = useState('list'); // 'list' | 'breakdown'
   
@@ -66,9 +70,16 @@ export default function IncomeExpenseView({ selectedBranch, setSelectedBranch })
   };
 
   const handleDeleteReceipt = async (id) => {
+    if (isFranchise) {
+      alert('Action restricted: Uploaded income receipts cannot be modified or deleted on the franchise dashboard.');
+      return;
+    }
     if (!window.confirm('Delete receipt record?')) return;
     try {
-      await fetch(`/api/receipts/${id}`, { method: 'DELETE' });
+      const headers = {};
+      const token = localStorage.getItem('tf_auth_token');
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      await fetch(`/api/receipts/${id}`, { method: 'DELETE', headers });
       fetchData();
     } catch (e) {
       console.error(e);
@@ -285,7 +296,7 @@ export default function IncomeExpenseView({ selectedBranch, setSelectedBranch })
           </div>
 
           {/* Search & Filter Controls Toolbar */}
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr', gap: '10px', background: 'var(--bg-card)', padding: '14px 18px', borderRadius: '16px', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-card)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1.2fr 1fr 1fr 1fr 1fr', gap: '10px', background: 'var(--bg-card)', padding: '14px 18px', borderRadius: '16px', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-card)' }}>
             <div style={{ position: 'relative' }}>
               <Search className="w-4 h-4 text-slate-400" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
               <input
@@ -296,6 +307,18 @@ export default function IncomeExpenseView({ selectedBranch, setSelectedBranch })
                 style={{ width: '100%', padding: '8px 12px 8px 36px', background: 'var(--bg-input)', border: '1px solid var(--border-color)', borderRadius: '10px', color: 'var(--text-white)', fontSize: '12.5px', outline: 'none' }}
               />
             </div>
+
+            {setSelectedBranch && (
+              <select
+                value={selectedBranch || 'Pune (FC Road) ★'}
+                onChange={(e) => setSelectedBranch(e.target.value)}
+                style={{ width: '100%', padding: '8px 12px', background: 'var(--bg-input)', border: '1px solid var(--border-color)', borderRadius: '10px', color: 'var(--text-white)', fontSize: '12.5px', outline: 'none', fontWeight: '700', cursor: 'pointer' }}
+              >
+                <option value="Pune (FC Road) ★">Branch: Pune (FC Road) ★</option>
+                <option value="Kolhapur (Tarabai Park) ★">Branch: Kolhapur (Tarabai Park) ★</option>
+                <option value="All Branches (Global View)">Branch: All Branches (Global View)</option>
+              </select>
+            )}
 
             <select
               value={statusFilter}
@@ -335,56 +358,67 @@ export default function IncomeExpenseView({ selectedBranch, setSelectedBranch })
             />
           </div>
 
-          {/* Utility Action Warning Bar (Delete LEGACY & Cleanup Duplicates) */}
-          <div style={{ background: 'rgba(254, 243, 199, 0.05)', border: '1px solid rgba(245, 158, 11, 0.25)', padding: '10px 16px', borderRadius: '12px', display: 'flex', justifyBetween: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <button onClick={handleDeleteLegacy} style={{ padding: '6px 14px', background: 'rgba(244, 63, 94, 0.1)', color: '#fb7185', border: '1px solid rgba(244, 63, 94, 0.3)', borderRadius: '8px', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}>
-                Delete LEGACY imports...
-              </button>
-
-              <button onClick={handleCleanupDuplicates} style={{ padding: '6px 14px', background: 'rgba(217, 119, 6, 0.1)', color: '#d97706', border: '1px solid rgba(217, 119, 6, 0.3)', borderRadius: '8px', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}>
-                Cleanup duplicates...
-              </button>
+          {/* Utility Action Warning Bar / Franchise Audit Policy Notice */}
+          {isFranchise ? (
+            <div style={{ background: 'rgba(6, 182, 212, 0.08)', border: '1px solid rgba(6, 182, 212, 0.25)', padding: '10px 16px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12.5px', color: '#06b6d4' }}>
+              <ShieldCheck className="w-4 h-4 text-cyan-400 shrink-0" />
+              <span><strong>Franchise Dashboard Policy:</strong> Receipts once uploaded are finalized for audit & share calculations. Editing or modifying uploaded income records is disabled.</span>
             </div>
+          ) : (
+            <div style={{ background: 'rgba(254, 243, 199, 0.05)', border: '1px solid rgba(245, 158, 11, 0.25)', padding: '10px 16px', borderRadius: '12px', display: 'flex', justifyBetween: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <button onClick={handleDeleteLegacy} style={{ padding: '6px 14px', background: 'rgba(244, 63, 94, 0.1)', color: '#fb7185', border: '1px solid rgba(244, 63, 94, 0.3)', borderRadius: '8px', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}>
+                  Delete LEGACY imports...
+                </button>
 
-            <span style={{ fontSize: '11px', color: 'var(--text-slate-400)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />
-              Use to undo a wrong bulk-import. Doesn't touch any real receipts.
-            </span>
-          </div>
+                <button onClick={handleCleanupDuplicates} style={{ padding: '6px 14px', background: 'rgba(217, 119, 6, 0.1)', color: '#d97706', border: '1px solid rgba(217, 119, 6, 0.3)', borderRadius: '8px', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}>
+                  Cleanup duplicates...
+                </button>
+              </div>
+
+              <span style={{ fontSize: '11px', color: 'var(--text-slate-400)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />
+                Use to undo a wrong bulk-import. Doesn't touch any real receipts.
+              </span>
+            </div>
+          )}
 
           {/* Receipts Table */}
           <div className="portal-table-container">
             <table className="portal-data-table">
               <thead>
                 <tr>
-                  <th style={{ width: '3%' }}>
-                    <input type="checkbox" onChange={handleSelectAll} checked={selectedIds.length === receipts.length && receipts.length > 0} />
-                  </th>
-                  <th style={{ width: '10%' }}>DATE</th>
+                  {!isFranchise && (
+                    <th style={{ width: '3%' }}>
+                      <input type="checkbox" onChange={handleSelectAll} checked={selectedIds.length === receipts.length && receipts.length > 0} />
+                    </th>
+                  )}
+                  <th style={{ width: isFranchise ? '11%' : '10%' }}>DATE</th>
                   <th style={{ width: '16%' }}>RECEIPT NO</th>
-                  <th style={{ width: '18%' }}>STUDENT</th>
-                  <th style={{ width: '18%' }}>COURSE</th>
+                  <th style={{ width: isFranchise ? '20%' : '18%' }}>STUDENT</th>
+                  <th style={{ width: isFranchise ? '20%' : '18%' }}>COURSE</th>
                   <th style={{ textAlign: 'right', width: '10%' }}>TOTAL</th>
                   <th style={{ textAlign: 'right', width: '10%' }}>PAID</th>
                   <th style={{ textAlign: 'right', width: '10%' }}>PENDING</th>
                   <th style={{ textAlign: 'center', width: '8%' }}>STATUS</th>
-                  <th style={{ textAlign: 'center', width: '7%' }}>ACTION</th>
+                  <th style={{ textAlign: 'center', width: isFranchise ? '6%' : '7%' }}>ACTION</th>
                 </tr>
               </thead>
               <tbody>
                 {receipts.length === 0 ? (
                   <tr>
-                    <td colSpan={10} style={{ textAlign: 'center', color: 'var(--text-slate-400)', padding: '36px' }}>
-                      No student receipts recorded for {branchDisplayName}. Click "New receipt" or "Import from billing software" to add data.
+                    <td colSpan={isFranchise ? 9 : 10} style={{ textAlign: 'center', color: 'var(--text-slate-400)', padding: '36px' }}>
+                      No student receipts recorded for {branchDisplayName}. Click "New receipt" to add data.
                     </td>
                   </tr>
                 ) : (
                   receipts.map((r) => (
                     <tr key={r.id || r._id}>
-                      <td>
-                        <input type="checkbox" checked={selectedIds.includes(r.id || r._id)} onChange={() => handleSelectOne(r.id || r._id)} />
-                      </td>
+                      {!isFranchise && (
+                        <td>
+                          <input type="checkbox" checked={selectedIds.includes(r.id || r._id)} onChange={() => handleSelectOne(r.id || r._id)} />
+                        </td>
+                      )}
                       <td style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--text-slate-400)' }}>
                         {r.dateOfReceipt}
                       </td>
@@ -417,9 +451,19 @@ export default function IncomeExpenseView({ selectedBranch, setSelectedBranch })
                       </td>
                       <td style={{ textAlign: 'center' }}>
                         <div style={{ display: 'flex', gap: '6px', justifyContent: 'center' }}>
-                          <button onClick={() => setEditingReceipt(r)} className="action-btn" title="Edit Receipt"><Edit className="w-3.5 h-3.5 text-teal-500" /></button>
-                          <button onClick={() => setViewingReceipt(r)} className="action-btn" title="View Receipt Invoice"><Eye className="w-3.5 h-3.5" /></button>
-                          <button onClick={() => handleDeleteReceipt(r.id || r._id)} className="action-btn" style={{ color: '#fb7185' }} title="Delete Receipt"><Trash2 className="w-3.5 h-3.5" /></button>
+                          {!isFranchise && (
+                            <button onClick={() => setEditingReceipt(r)} className="action-btn" title="Edit Receipt">
+                              <Edit className="w-3.5 h-3.5 text-teal-500" />
+                            </button>
+                          )}
+                          <button onClick={() => setViewingReceipt(r)} className="action-btn" title="View Receipt Invoice">
+                            <Eye className="w-3.5 h-3.5" />
+                          </button>
+                          {!isFranchise && (
+                            <button onClick={() => handleDeleteReceipt(r.id || r._id)} className="action-btn" style={{ color: '#fb7185' }} title="Delete Receipt">
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -490,7 +534,7 @@ export default function IncomeExpenseView({ selectedBranch, setSelectedBranch })
           </div>
 
           {/* Search & Filter Toolbar */}
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr', gap: '10px', background: 'var(--bg-card)', padding: '14px 18px', borderRadius: '16px', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-card)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1.2fr 1fr 1fr 1fr', gap: '10px', background: 'var(--bg-card)', padding: '14px 18px', borderRadius: '16px', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-card)' }}>
             <div style={{ position: 'relative' }}>
               <Search className="w-4 h-4 text-slate-400" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
               <input
@@ -501,6 +545,18 @@ export default function IncomeExpenseView({ selectedBranch, setSelectedBranch })
                 style={{ width: '100%', padding: '8px 12px 8px 36px', background: 'var(--bg-input)', border: '1px solid var(--border-color)', borderRadius: '10px', color: 'var(--text-white)', fontSize: '12.5px', outline: 'none' }}
               />
             </div>
+
+            {setSelectedBranch && (
+              <select
+                value={selectedBranch || 'Pune (FC Road) ★'}
+                onChange={(e) => setSelectedBranch(e.target.value)}
+                style={{ width: '100%', padding: '8px 12px', background: 'var(--bg-input)', border: '1px solid var(--border-color)', borderRadius: '10px', color: 'var(--text-white)', fontSize: '12.5px', outline: 'none', fontWeight: '700', cursor: 'pointer' }}
+              >
+                <option value="Pune (FC Road) ★">Branch: Pune (FC Road) ★</option>
+                <option value="Kolhapur (Tarabai Park) ★">Branch: Kolhapur (Tarabai Park) ★</option>
+                <option value="All Branches (Global View)">Branch: All Branches (Global View)</option>
+              </select>
+            )}
 
             <select
               value={voucherCategoryFilter}
@@ -644,11 +700,11 @@ export default function IncomeExpenseView({ selectedBranch, setSelectedBranch })
 
       {/* Modals */}
       <CreateReceiptModal
-        isOpen={isReceiptModalOpen || !!editingReceipt}
+        isOpen={isReceiptModalOpen || (!isFranchise && !!editingReceipt)}
         onClose={() => { setIsReceiptModalOpen(false); setEditingReceipt(null); }}
         onSaveSuccess={(newR) => { fetchData(); if (newR && !editingReceipt) setViewingReceipt(newR); setEditingReceipt(null); }}
         initialBranch={selectedBranch}
-        initialData={editingReceipt}
+        initialData={isFranchise ? null : editingReceipt}
       />
 
       <CreateVoucherModal

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Calculator, Plus, AlertCircle, Sparkles, CheckCircle2, User, Phone, Mail, MapPin, Building, BookOpen, GraduationCap, DollarSign, CreditCard } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const COURSES_WITH_PRICES = [
   { name: 'AMCT Beginner — ₹17,000 (45 days)', fee: 17000 },
@@ -30,6 +31,8 @@ const MAHARASHTRA_BRANCHES = [
 ];
 
 export default function CreateReceiptModal({ isOpen, onClose, onSaveSuccess, initialBranch, initialData = null }) {
+  const { user } = useAuth();
+  const isFranchise = user?.role === 'franchise_partner';
   const defaultBranch = (initialBranch && !initialBranch.includes('Salem')) ? initialBranch : 'Pune (FC Road) ★';
 
   const [formData, setFormData] = useState({
@@ -100,7 +103,7 @@ export default function CreateReceiptModal({ isOpen, onClose, onSaveSuccess, ini
     }
   }, [formData.paidBranch]);
 
-  if (!isOpen) return null;
+  if (!isOpen || (initialData && isFranchise)) return null;
 
   const handleCourseChange = (e) => {
     const selectedCourseName = e.target.value;
@@ -133,6 +136,10 @@ export default function CreateReceiptModal({ isOpen, onClose, onSaveSuccess, ini
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (initialData && isFranchise) {
+      alert('Action not permitted: Uploaded receipts cannot be edited on the franchise dashboard.');
+      return;
+    }
     if (!formData.studentName.trim() || !formData.cellNumber.trim()) {
       alert('Please fill student name and cell number');
       return;
@@ -140,9 +147,13 @@ export default function CreateReceiptModal({ isOpen, onClose, onSaveSuccess, ini
 
     setIsSubmitting(true);
     try {
+      const headers = { 'Content-Type': 'application/json' };
+      const token = localStorage.getItem('tf_auth_token');
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
       const res = await fetch('/api/receipts', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify(formData)
       });
 

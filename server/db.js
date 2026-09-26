@@ -160,13 +160,21 @@ export const resetDatabase = async () => {
 
 const initializeSystemBranches = async () => {
   try {
-    const existingBranchesCount = await Branch.countDocuments();
-    if (existingBranchesCount === 0) {
-      await Branch.insertMany(systemBranches);
-      console.log('[MongoDB] System branches initialized for Pune & Kolhapur.');
-    } else {
-      console.log(`[MongoDB] Database active with ${existingBranchesCount} registered branches.`);
+    for (const b of systemBranches) {
+      await Branch.findOneAndUpdate(
+        { code: b.code },
+        { 
+          $set: { 
+            name: b.name, 
+            region: b.region, 
+            isFeatured: b.isFeatured, 
+            equityStakeholders: b.equityStakeholders 
+          } 
+        },
+        { upsert: true, new: true }
+      );
     }
+    console.log('[MongoDB] System branches & equity shares synchronized for Pune, Kolhapur & All MH.');
   } catch (err) {
     console.error('[MongoDB] Error initializing system branches:', err.message);
   }
@@ -178,20 +186,20 @@ const systemBranches = [
     name: 'Pune (FC Road) ★', 
     region: 'Maharashtra', 
     isFeatured: true, 
-    equityStakeholders: { "Pune College": 50, "Thoughtflows": 25, "Career Vidhyalaya": 20, "Nilanjan": 5 } 
+    equityStakeholders: { "Thoughtflows (TF)": 50, "Career Vidyalaya": 25, "Nilanjan": 25 } 
   },
   { 
     code: 'Kolhapur', 
     name: 'Kolhapur (Tarabai Park) ★', 
     region: 'Maharashtra', 
     isFeatured: true, 
-    equityStakeholders: { "Genesis College": 50, "Thoughtflows": 25, "Career Vidhyalaya": 25 } 
+    equityStakeholders: { "Genesis": 50, "Thoughtflows (TF)": 25, "Career Vidyalaya": 20, "Nilanjan": 5 } 
   },
   { 
     code: 'All', 
     name: 'All Maharashtra Branches (Pune & Kolhapur)', 
     region: 'Maharashtra Consolidated', 
     isFeatured: true, 
-    equityStakeholders: { "Partner Colleges": 50, "Thoughtflows": 25, "Career Vidhyalaya": 20, "Nilanjan": 5 } 
+    equityStakeholders: { "Thoughtflows (TF)": 50, "Career Vidyalaya": 25, "Nilanjan": 25 } 
   }
 ];

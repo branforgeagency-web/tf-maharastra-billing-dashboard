@@ -39,6 +39,13 @@ const DEMO_5_ACCOUNTS = {
     branch: 'Pune (FC Road) ★',
     password: 'branch123',
   },
+  'partner@thoughtflows.in': {
+    id: 'demo-partner-id',
+    email: 'partner@thoughtflows.in',
+    role: 'franchise_partner',
+    branch: 'All Branches (Global View)',
+    password: 'partner123',
+  },
 };
 
 export function AuthProvider({ children }) {

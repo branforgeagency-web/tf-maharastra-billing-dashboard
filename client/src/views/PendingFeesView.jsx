@@ -193,7 +193,7 @@ export default function PendingFeesView({ selectedBranch, setSelectedBranch }) {
       </div>
 
       {/* Search and Filter Controls Toolbar */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '14px', alignItems: 'center', background: 'var(--bg-card)', padding: '16px 20px', borderRadius: '16px', border: '1.5px solid var(--border-color)', boxShadow: 'var(--shadow-card)' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1.2fr 1fr 1fr', gap: '14px', alignItems: 'center', background: 'var(--bg-card)', padding: '16px 20px', borderRadius: '16px', border: '1.5px solid var(--border-color)', boxShadow: 'var(--shadow-card)' }}>
         <div style={{ position: 'relative', minWidth: 0 }}>
           <Search className="w-4 h-4 text-slate-400" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
           <input
@@ -204,6 +204,20 @@ export default function PendingFeesView({ selectedBranch, setSelectedBranch }) {
             style={{ width: '100%', padding: '9.5px 12px 9.5px 36px', background: 'var(--bg-input)', border: '1.5px solid var(--border-color)', borderRadius: '10px', color: 'var(--text-white)', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }}
           />
         </div>
+
+        {setSelectedBranch && (
+          <div style={{ minWidth: 0 }}>
+            <select
+              value={selectedBranch || 'Pune (FC Road) ★'}
+              onChange={(e) => setSelectedBranch(e.target.value)}
+              style={{ width: '100%', padding: '9.5px 12px', background: 'var(--bg-input)', border: '1.5px solid var(--border-color)', borderRadius: '10px', color: 'var(--text-white)', fontSize: '13px', outline: 'none', cursor: 'pointer', boxSizing: 'border-box', fontWeight: '700' }}
+            >
+              <option value="Pune (FC Road) ★">Branch: Pune (FC Road) ★</option>
+              <option value="Kolhapur (Tarabai Park) ★">Branch: Kolhapur (Tarabai Park) ★</option>
+              <option value="All Branches (Global View)">Branch: All Branches (Global View)</option>
+            </select>
+          </div>
+        )}
 
         <div style={{ minWidth: 0 }}>
           <select

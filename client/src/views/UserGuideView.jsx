@@ -161,7 +161,12 @@ export default function UserGuideView() {
           </div>
 
           <div style={{ background: 'rgba(59, 130, 246, 0.08)', padding: '14px', borderRadius: '12px', border: '1px solid rgba(59, 130, 246, 0.3)', color: 'var(--text-slate-200)' }}>
-            <strong>Why this matters:</strong> Pockets show where money sits right now. Profit calculations happen separately — they don't care which pocket the money is in. At month-end, partner and HQ settle so each gets their 50% share of net profit.
+            <strong>Why this matters:</strong> Pockets show where money sits right now. Profit calculations happen separately — they don't care which pocket the money is in. At month-end, partner and HQ settle based on agreed equity shares:
+            <ul style={{ margin: '6px 0 0 18px', padding: 0 }}>
+              <li><strong>Agreement 1 (All MH Territory):</strong> Exclusively Career Vidyalaya (25%) & Nilanjan (25%) with Thoughtflows (50%).</li>
+              <li><strong>Agreement 2 (Pune Branch):</strong> Thoughtflows (50%), Career Vidyalaya (25%), Nilanjan (25%).</li>
+              <li><strong>Agreement 3 (Kolhapur Branch):</strong> Genesis College (50%), Thoughtflows (25%), Career Vidyalaya (20%), Nilanjan (5%).</li>
+            </ul>
           </div>
         </div>
       </div>

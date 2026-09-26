@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
-  Shield, Users, BookOpenCheck, BarChart3, Building2, 
+  Shield, Users, BookOpenCheck, BarChart3, Building2, Handshake,
   Mail, Lock, Eye, EyeOff, AlertCircle, Sparkles, ArrowRight, CheckCircle2
 } from 'lucide-react';
 import logoImg from '../assets/thoughtflows-logo.png';
@@ -67,6 +67,18 @@ const ROLE_CARDS = [
     defaultEmail: 'you@thoughtflows.in',
     defaultPassword: 'branch123',
     icon: Building2,
+  },
+  {
+    id: 'franchise_partner',
+    badgeText: 'FRANCHISE PARTNERS',
+    roleTitle: 'Franchise Partners',
+    badgeGradient: 'linear-gradient(135deg, #0e7490 0%, #0891b2 50%, #06b6d4 100%)',
+    glowColor: 'rgba(6, 182, 212, 0.45)',
+    accentColor: '#06b6d4',
+    subtitle: 'Career Vidyalaya & Nilanjan — Maharashtra exclusive franchise partners & equity shares',
+    defaultEmail: 'partner@thoughtflows.in',
+    defaultPassword: 'partner123',
+    icon: Handshake,
   },
 ];
 
@@ -182,6 +194,8 @@ export default function LoginView() {
             <h2 className="role-main-title">Sign in to {selectedRole.roleTitle}</h2>
             <p className="role-main-subtitle">{selectedRole.subtitle}</p>
           </div>
+
+
         </div>
 
         {/* Error Alert */}

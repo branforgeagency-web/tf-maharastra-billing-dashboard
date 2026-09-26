@@ -31,6 +31,7 @@ const UserSchema = new mongoose.Schema({
       'department_head',
       'finance_manager',
       'branch_head',
+      'franchise_partner',
       'admin',
       'management'
     ],

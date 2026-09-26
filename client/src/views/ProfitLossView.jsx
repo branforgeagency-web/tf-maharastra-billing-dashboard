@@ -1,8 +1,46 @@
 import React, { useState, useEffect } from 'react';
-import { PieChart, TrendingUp, Sparkles, Building, ArrowLeft, BarChart3, HelpCircle, CheckCircle2, ArrowRightLeft, DollarSign, Wallet, AlertTriangle, Zap, Users, User, Info, Building2 } from 'lucide-react';
+import { 
+  PieChart, TrendingUp, Sparkles, Building, ArrowLeft, BarChart3, 
+  HelpCircle, CheckCircle2, ArrowRightLeft, DollarSign, Wallet, 
+  AlertTriangle, Zap, Users, User, Info, Building2, Handshake, Award 
+} from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const MAHARASHTRA_BRANCHES = ['Pune (FC Road) ★', 'Kolhapur (Tarabai Park) ★', 'All Branches (Global View)'];
+
+export const BRANCH_AGREEMENTS = {
+  Pune: {
+    agreement: 'Agreement 2: Pune Branch Equity Split',
+    detail: 'Thoughtflows (TF): 50% | Career Vidyalaya: 25% | Nilanjan: 25%',
+    note: 'Exclusive Maharashtra partnership distribution for Pune branch.',
+    partners: [
+      { stakeholder: 'Thoughtflows (TF)', key: 'TF', percentage: 50, color: '#10b981', badge: 'TF HQ (50%)' },
+      { stakeholder: 'Career Vidyalaya', key: 'Career Vidyalaya', percentage: 25, color: '#8b5cf6', badge: 'Franchise Partner (25%)' },
+      { stakeholder: 'Nilanjan', key: 'Nilanjan', percentage: 25, color: '#f59e0b', badge: 'Franchise Partner (25%)' }
+    ]
+  },
+  Kolhapur: {
+    agreement: 'Agreement 3: Kolhapur Branch Equity Split',
+    detail: 'Genesis: 50% | Thoughtflows (TF): 25% | Career Vidyalaya: 20% | Nilanjan: 5%',
+    note: 'Kolhapur branch partnership with Genesis College.',
+    partners: [
+      { stakeholder: 'Genesis College', key: 'Genesis', percentage: 50, color: '#06b6d4', badge: 'College Partner (50%)' },
+      { stakeholder: 'Thoughtflows (TF)', key: 'TF', percentage: 25, color: '#10b981', badge: 'TF HQ (25%)' },
+      { stakeholder: 'Career Vidyalaya', key: 'Career Vidyalaya', percentage: 20, color: '#8b5cf6', badge: 'Franchise Partner (20%)' },
+      { stakeholder: 'Nilanjan', key: 'Nilanjan', percentage: 5, color: '#f59e0b', badge: 'Franchise Partner (5%)' }
+    ]
+  },
+  All: {
+    agreement: 'Agreement 1: Entire MH Territory Exclusive Franchise',
+    detail: 'Exclusive to Career Vidyalaya & Nilanjan — TF: 50% | Career Vidyalaya: 25% | Nilanjan: 25%',
+    note: 'Strict agreement: Entire Maharashtra given exclusively to Career Vidyalaya & Nilanjan, no other outside partners.',
+    partners: [
+      { stakeholder: 'Thoughtflows (TF)', key: 'TF', percentage: 50, color: '#10b981', badge: 'TF HQ (50%)' },
+      { stakeholder: 'Career Vidyalaya', key: 'Career Vidyalaya', percentage: 25, color: '#8b5cf6', badge: 'Exclusive Partner (25%)' },
+      { stakeholder: 'Nilanjan', key: 'Nilanjan', percentage: 25, color: '#f59e0b', badge: 'Exclusive Partner (25%)' }
+    ]
+  }
+};
 
 export default function ProfitLossView({ selectedBranch, setSelectedBranch }) {
   const [periodMode, setPeriodMode] = useState('Monthly'); // Monthly | Quarterly | Yearly
@@ -52,7 +90,41 @@ export default function ProfitLossView({ selectedBranch, setSelectedBranch }) {
   const totalExpenses = filteredVouchers.reduce((a, v) => a + (v.amount || 0), 0);
   const netProfit = totalIncome - totalExpenses;
   const isLoss = netProfit < 0;
-  const eachPartnerShare = Math.round(netProfit / 2);
+
+  // Branch Agreement Equity Configuration
+  const branchKey = (selectedBranch || '').toLowerCase().includes('kolhapur')
+    ? 'Kolhapur'
+    : (selectedBranch || '').toLowerCase().includes('pune')
+    ? 'Pune'
+    : 'All';
+
+  const currentAgreement = BRANCH_AGREEMENTS[branchKey] || BRANCH_AGREEMENTS.Pune;
+
+  // Calculate each stakeholder's distributed share amount
+  const stakeholderShares = currentAgreement.partners.map(p => {
+    const amount = Math.round((netProfit * p.percentage) / 100);
+    return {
+      ...p,
+      amount
+    };
+  });
+
+  const tfStakeholder = stakeholderShares.find(s => s.key === 'TF');
+  const tfShare = tfStakeholder?.amount || 0;
+  const tfPercentage = tfStakeholder?.percentage || 50;
+
+  const careerVidyalayaStakeholder = stakeholderShares.find(s => s.key === 'Career Vidyalaya');
+  const careerVidyalayaShare = careerVidyalayaStakeholder?.amount || 0;
+
+  const nilanjanStakeholder = stakeholderShares.find(s => s.key === 'Nilanjan');
+  const nilanjanShare = nilanjanStakeholder?.amount || 0;
+
+  const genesisStakeholder = stakeholderShares.find(s => s.key === 'Genesis');
+  const genesisShare = genesisStakeholder?.amount || 0;
+
+  // Partner pool (Career Vidyalaya, Nilanjan, Genesis)
+  const partnerPoolShare = netProfit - tfShare;
+  const partnerPoolPercentage = 100 - tfPercentage;
 
   // Committed Business & Pending Balance
   const totalCommittedBusiness = filteredReceipts.reduce((a, r) => a + (r.courseFee || 0), 0);
@@ -96,14 +168,11 @@ export default function ProfitLossView({ selectedBranch, setSelectedBranch }) {
   const partnerPaid = filteredVouchers.filter(v => v.party === 'Partner').reduce((a, v) => a + (v.amount || 0), 0);
   const partnerNetCash = partnerCollected - partnerPaid;
 
-  // Fair share (50% of pooled net profit/loss)
-  const fairShare = eachPartnerShare;
-
   // Settlement Transfer logic
   // Partner's cash position after receipts & expenses: partnerNetCash
-  // Partner's target net position after 50-50 split: fairShare
-  // Transfer needed = fairShare - partnerNetCash
-  const settlementTransfer = fairShare - partnerNetCash;
+  // Partner's target net position after agreed equity split: partnerPoolShare
+  // Transfer needed = partnerPoolShare - partnerNetCash
+  const settlementTransfer = partnerPoolShare - partnerNetCash;
 
   // Monthly Breakdown Rows for "Year at a glance" Table
   const monthsMap = {};
@@ -409,43 +478,126 @@ export default function ProfitLossView({ selectedBranch, setSelectedBranch }) {
       <div className="dashboard-panel-card">
         <div className="panel-title-bar">
           <h3 className="panel-heading" style={{ color: 'var(--tf-teal-primary)' }}>
-            <Users className="w-5 h-5 text-teal-600" />
-            Partner distribution · {selectedMonth} · {branchName}
+            <Handshake className="w-5 h-5 text-teal-600" />
+            Branch Equity & Partner Distribution · {selectedMonth} · {branchName}
           </h3>
+          <span style={{
+            fontSize: '11px',
+            fontWeight: '800',
+            padding: '4px 10px',
+            borderRadius: '6px',
+            background: 'rgba(16, 185, 129, 0.15)',
+            color: '#10b981',
+            border: '1px solid rgba(16, 185, 129, 0.3)'
+          }}>
+            {currentAgreement.agreement}
+          </span>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '14px', margin: '12px 0 16px 0' }}>
+        {/* Top Financial Stats */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '14px', margin: '14px 0 16px 0' }}>
           <div style={{ background: 'var(--bg-input)', padding: '14px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-            <span style={{ fontSize: '11px', color: 'var(--text-slate-400)', fontWeight: '700', textTransform: 'uppercase' }}>Total Income</span>
+            <span style={{ fontSize: '11px', color: 'var(--text-slate-400)', fontWeight: '700', textTransform: 'uppercase' }}>Total Inflow Revenue</span>
             <div style={{ fontSize: '18px', fontWeight: '900', fontFamily: 'var(--font-mono)', color: 'var(--tf-teal-primary)', marginTop: '4px' }}>
               ₹{totalIncome.toLocaleString('en-IN')}
             </div>
           </div>
 
           <div style={{ background: 'var(--bg-input)', padding: '14px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-            <span style={{ fontSize: '11px', color: 'var(--text-slate-400)', fontWeight: '700', textTransform: 'uppercase' }}>Total Expenses</span>
+            <span style={{ fontSize: '11px', color: 'var(--text-slate-400)', fontWeight: '700', textTransform: 'uppercase' }}>Total Operating Expenses</span>
             <div style={{ fontSize: '18px', fontWeight: '900', fontFamily: 'var(--font-mono)', color: '#fb7185', marginTop: '4px' }}>
               ₹{totalExpenses.toLocaleString('en-IN')}
             </div>
           </div>
 
-          <div style={{ background: 'var(--bg-input)', padding: '14px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-            <span style={{ fontSize: '11px', color: 'var(--text-slate-400)', fontWeight: '700', textTransform: 'uppercase' }}>Net Profit / Loss</span>
+          <div style={{ background: isLoss ? 'rgba(244, 63, 94, 0.1)' : 'rgba(16, 185, 129, 0.1)', padding: '14px', borderRadius: '12px', border: `1.5px solid ${isLoss ? '#f43f5e' : '#10b981'}` }}>
+            <span style={{ fontSize: '11px', color: isLoss ? '#fb7185' : 'var(--tf-teal-primary)', fontWeight: '800', textTransform: 'uppercase' }}>
+              {isLoss ? 'Net Operating Deficit' : 'Net Distributable Profit Pool'}
+            </span>
             <div style={{ fontSize: '18px', fontWeight: '900', fontFamily: 'var(--font-mono)', color: isLoss ? '#fb7185' : 'var(--tf-teal-primary)', marginTop: '4px' }}>
               {isLoss ? '-' : ''}₹{Math.abs(netProfit).toLocaleString('en-IN')}
             </div>
           </div>
+        </div>
 
-          <div style={{ background: 'rgba(0, 137, 123, 0.12)', padding: '14px', borderRadius: '12px', border: '1.5px solid var(--tf-teal-primary)' }}>
-            <span style={{ fontSize: '11px', color: 'var(--tf-teal-primary)', fontWeight: '800', textTransform: 'uppercase' }}>Each partner (50%)</span>
-            <div style={{ fontSize: '18px', fontWeight: '900', fontFamily: 'var(--font-mono)', color: 'var(--tf-teal-primary)', marginTop: '4px' }}>
-              {eachPartnerShare < 0 ? '-' : ''}₹{Math.abs(eachPartnerShare).toLocaleString('en-IN')}
+        {/* Agreement Highlight Banner */}
+        <div style={{
+          background: 'linear-gradient(135deg, rgba(14, 116, 144, 0.12) 0%, rgba(15, 23, 42, 0.7) 100%)',
+          border: '1px solid rgba(14, 116, 144, 0.35)',
+          borderRadius: '14px',
+          padding: '14px 18px',
+          marginBottom: '18px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '10px'
+        }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+              <Award className="w-4 h-4 text-cyan-400" />
+              <strong style={{ fontSize: '13px', color: '#fff' }}>{currentAgreement.detail}</strong>
             </div>
+            <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-slate-400)' }}>
+              {currentAgreement.note}
+            </p>
           </div>
         </div>
 
-        <div style={{ background: 'var(--bg-input)', padding: '12px 16px', borderRadius: '12px', border: '1px solid var(--border-color)', fontSize: '11.5px', color: 'var(--text-slate-400)' }}>
-          Based on the 50-50 franchise model: <strong>HQ Coimbatore</strong> & the <strong>{branchName} franchisee</strong> split net profit equally after expenses.
+        {/* Individual Stakeholder Share Cards */}
+        <div style={{ display: 'grid', gridTemplateColumns: `repeat(${stakeholderShares.length}, 1fr)`, gap: '14px', marginBottom: '14px' }}>
+          {stakeholderShares.map((stakeholder) => (
+            <div 
+              key={stakeholder.key}
+              style={{
+                background: 'var(--bg-input)',
+                padding: '16px',
+                borderRadius: '14px',
+                border: `1.5px solid ${stakeholder.color}40`,
+                boxShadow: `0 4px 12px ${stakeholder.color}15`,
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                gap: '10px'
+              }}
+            >
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>
+                  <span style={{ fontSize: '12.5px', fontWeight: '800', color: 'var(--text-white)' }}>
+                    {stakeholder.stakeholder}
+                  </span>
+                  <span style={{
+                    fontSize: '11px',
+                    fontWeight: '900',
+                    padding: '2px 8px',
+                    borderRadius: '50px',
+                    background: `${stakeholder.color}25`,
+                    color: stakeholder.color,
+                    border: `1px solid ${stakeholder.color}60`
+                  }}>
+                    {stakeholder.percentage}%
+                  </span>
+                </div>
+                <span style={{ fontSize: '10.5px', color: 'var(--text-slate-400)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  {stakeholder.badge}
+                </span>
+              </div>
+
+              {/* Progress bar */}
+              <div style={{ width: '100%', height: '5px', background: 'rgba(255, 255, 255, 0.08)', borderRadius: '10px', overflow: 'hidden' }}>
+                <div style={{ width: `${stakeholder.percentage}%`, height: '100%', background: stakeholder.color, borderRadius: '10px' }} />
+              </div>
+
+              <div style={{ paddingTop: '8px', borderTop: '1px solid var(--border-color)' }}>
+                <span style={{ fontSize: '10px', color: 'var(--text-slate-400)', textTransform: 'uppercase', display: 'block', marginBottom: '2px' }}>
+                  Calculated Net Share
+                </span>
+                <span style={{ fontSize: '18px', fontWeight: '900', fontFamily: 'var(--font-mono)', color: stakeholder.color }}>
+                  {stakeholder.amount < 0 ? '-' : ''}₹{Math.abs(stakeholder.amount).toLocaleString('en-IN')}
+                </span>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -454,9 +606,9 @@ export default function ProfitLossView({ selectedBranch, setSelectedBranch }) {
         <div className="panel-title-bar">
           <h3 className="panel-heading" style={{ color: 'var(--amber-primary)' }}>
             <ArrowRightLeft className="w-5 h-5 text-amber-500" />
-            ₹ Net settlement · {branchName} · {selectedMonth}
+            ₹ Net Settlement & Pocket Reconciliation · {branchName} · {selectedMonth}
           </h3>
-          <span style={{ fontSize: '11px', color: 'var(--text-slate-400)', fontWeight: '700' }}>Party = Management vs Partner</span>
+          <span style={{ fontSize: '11px', color: 'var(--text-slate-400)', fontWeight: '700' }}>Party = Management vs Franchise Partners</span>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px', marginTop: '14px' }}>
@@ -465,61 +617,75 @@ export default function ProfitLossView({ selectedBranch, setSelectedBranch }) {
           <div style={{ background: 'var(--bg-input)', padding: '18px', borderRadius: '16px', border: '1px solid var(--border-color)' }}>
             <h4 style={{ fontSize: '13px', fontWeight: '900', color: '#0284c7', textTransform: 'uppercase', margin: '0 0 12px 0', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Building2 className="w-4 h-4" />
-              HQ (Management party)
+              HQ (Thoughtflows Party)
             </h4>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '12.5px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--text-slate-400)' }}>Collected as Management</span>
+                <span style={{ color: 'var(--text-slate-400)' }}>Collected by Management Pocket</span>
                 <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 'bold' }}>₹{mgmtCollected.toLocaleString('en-IN')}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--text-slate-400)' }}>Paid as Management</span>
+                <span style={{ color: 'var(--text-slate-400)' }}>Paid by Management Pocket</span>
                 <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 'bold' }}>₹{mgmtPaid.toLocaleString('en-IN')}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '8px', borderTop: '1px solid var(--border-color)', fontWeight: 'bold' }}>
-                <span>Net cash position</span>
+                <span>Net Cash Held in HQ Pocket</span>
                 <span style={{ fontFamily: 'var(--font-mono)', color: mgmtNetCash >= 0 ? 'var(--tf-teal-primary)' : '#fb7185' }}>
                   {mgmtNetCash < 0 ? '-' : ''}₹{Math.abs(mgmtNetCash).toLocaleString('en-IN')}
                 </span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold' }}>
-                <span>Fair share (50%)</span>
-                <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--amber-primary)' }}>
-                  {fairShare < 0 ? '-' : ''}₹{Math.abs(fairShare).toLocaleString('en-IN')}
+                <span>TF Agreed Fair Share ({tfPercentage}%)</span>
+                <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--emerald-primary)' }}>
+                  {tfShare < 0 ? '-' : ''}₹{Math.abs(tfShare).toLocaleString('en-IN')}
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Branch Partner (Partner Party) */}
+          {/* Branch Franchise Partners (Partner Party) */}
           <div style={{ background: 'var(--bg-input)', padding: '18px', borderRadius: '16px', border: '1px solid var(--border-color)' }}>
-            <h4 style={{ fontSize: '13px', fontWeight: '900', color: 'var(--tf-teal-primary)', textTransform: 'uppercase', margin: '0 0 12px 0', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <User className="w-4 h-4" />
-              {branchName} (Partner party)
+            <h4 style={{ fontSize: '13px', fontWeight: '900', color: '#8b5cf6', textTransform: 'uppercase', margin: '0 0 12px 0', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Users className="w-4 h-4" />
+              Franchise Partners (Career Vidyalaya & Nilanjan)
             </h4>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '12.5px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--text-slate-400)' }}>Collected as Partner</span>
+                <span style={{ color: 'var(--text-slate-400)' }}>Collected by Partner Pocket</span>
                 <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 'bold' }}>₹{partnerCollected.toLocaleString('en-IN')}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--text-slate-400)' }}>Paid as Partner</span>
+                <span style={{ color: 'var(--text-slate-400)' }}>Paid by Partner Pocket</span>
                 <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 'bold' }}>₹{partnerPaid.toLocaleString('en-IN')}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '8px', borderTop: '1px solid var(--border-color)', fontWeight: 'bold' }}>
-                <span>Net cash position</span>
+                <span>Net Cash Held in Partner Pocket</span>
                 <span style={{ fontFamily: 'var(--font-mono)', color: partnerNetCash >= 0 ? 'var(--tf-teal-primary)' : '#fb7185' }}>
                   {partnerNetCash < 0 ? '-' : ''}₹{Math.abs(partnerNetCash).toLocaleString('en-IN')}
                 </span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold' }}>
-                <span>Fair share (50%)</span>
+                <span>Partner Pool Agreed Share ({partnerPoolPercentage}%)</span>
                 <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--amber-primary)' }}>
-                  {fairShare < 0 ? '-' : ''}₹{Math.abs(fairShare).toLocaleString('en-IN')}
+                  {partnerPoolShare < 0 ? '-' : ''}₹{Math.abs(partnerPoolShare).toLocaleString('en-IN')}
                 </span>
               </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: 'var(--text-slate-400)' }}>
+                <span>↳ Career Vidyalaya ({careerVidyalayaStakeholder?.percentage || 25}%)</span>
+                <span style={{ fontFamily: 'var(--font-mono)' }}>₹{careerVidyalayaShare.toLocaleString('en-IN')}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: 'var(--text-slate-400)' }}>
+                <span>↳ Nilanjan ({nilanjanStakeholder?.percentage || 25}%)</span>
+                <span style={{ fontFamily: 'var(--font-mono)' }}>₹{nilanjanShare.toLocaleString('en-IN')}</span>
+              </div>
+              {genesisStakeholder && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: 'var(--text-slate-400)' }}>
+                  <span>↳ Genesis ({genesisStakeholder.percentage}%)</span>
+                  <span style={{ fontFamily: 'var(--font-mono)' }}>₹{genesisShare.toLocaleString('en-IN')}</span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -530,14 +696,14 @@ export default function ProfitLossView({ selectedBranch, setSelectedBranch }) {
           <span style={{ fontSize: '10px', fontWeight: '900', textTransform: 'uppercase', color: 'var(--amber-primary)', letterSpacing: '0.6px' }}>SETTLEMENT TRANSFER</span>
           <h3 style={{ fontSize: '20px', fontWeight: '900', color: 'var(--amber-primary)', margin: '4px 0' }}>
             {settlementTransfer > 0 
-              ? `HQ pays ${branchName} partner ₹${Math.abs(settlementTransfer).toLocaleString('en-IN')}`
+              ? `HQ pays Franchise Partners ₹${Math.abs(settlementTransfer).toLocaleString('en-IN')}`
               : settlementTransfer < 0
-              ? `${branchName} partner pays HQ ₹${Math.abs(settlementTransfer).toLocaleString('en-IN')}`
+              ? `Franchise Partners pay HQ ₹${Math.abs(settlementTransfer).toLocaleString('en-IN')}`
               : 'Accounts are fully balanced (₹0 transfer)'
             }
           </h3>
           <p style={{ fontSize: '11.5px', color: 'var(--text-slate-400)', margin: 0 }}>
-            After settlement, both parties have borne ₹{Math.abs(fairShare).toLocaleString('en-IN')} of the {isLoss ? 'loss' : 'profit'} — exactly their 50% share.
+            After settlement: Thoughtflows receives ₹{Math.abs(tfShare).toLocaleString('en-IN')} ({tfPercentage}%), and Franchise Partners receive ₹{Math.abs(partnerPoolShare).toLocaleString('en-IN')} ({partnerPoolPercentage}%) per {currentAgreement.agreement}.
           </p>
         </div>
 

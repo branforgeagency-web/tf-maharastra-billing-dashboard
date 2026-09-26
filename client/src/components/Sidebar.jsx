@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { 
   TrendingUp, Compass, Landmark, ShieldAlert, 
-  BarChart3, Users, BookOpenCheck, Sparkles, BookOpen, X, ChevronRight, UserPlus
+  BarChart3, Users, BookOpenCheck, Sparkles, BookOpen, X, ChevronRight, UserPlus,
+  Handshake, ArrowRightLeft
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import logoImg from '../assets/thoughtflows-logo.png';
@@ -13,11 +14,12 @@ const ROLE_BADGES = {
   department_head: { label: 'DEPARTMENT HEAD', bg: '#b45309', color: '#fff' },
   finance_manager: { label: 'FINANCE MANAGER', bg: '#0d9488', color: '#fff' },
   branch_head: { label: 'BRANCH HEAD', bg: '#cff4fc', color: '#087990' },
+  franchise_partner: { label: 'FRANCHISE PARTNERS', bg: '#0891b2', color: '#fff' },
   admin: { label: 'ADMIN', bg: '#16213e', color: '#fff' },
   management: { label: 'MANAGEMENT', bg: '#0284c7', color: '#fff' },
 };
 
-const ALL_ROLES = ['bb_admin', 'operations_head', 'department_head', 'finance_manager', 'branch_head', 'admin', 'management'];
+const ALL_ROLES = ['bb_admin', 'operations_head', 'department_head', 'finance_manager', 'branch_head', 'franchise_partner', 'admin', 'management'];
 
 const NAV_ITEMS = [
   { 
@@ -36,7 +38,7 @@ const NAV_ITEMS = [
     icon: Compass, 
     iconBg: 'linear-gradient(135deg, #ff7e5f 0%, #f97316 50%, #ea580c 100%)',
     glowColor: 'rgba(249, 115, 22, 0.45)',
-    roles: ['bb_admin', 'operations_head', 'department_head', 'branch_head', 'admin', 'management']
+    roles: ['bb_admin', 'operations_head', 'department_head', 'branch_head', 'franchise_partner', 'admin', 'management']
   },
   { 
     path: '/b2b', 
@@ -59,11 +61,20 @@ const NAV_ITEMS = [
   { 
     path: '/profit-loss', 
     label: 'Profit & Loss', 
-    subtitle: 'Monthly · 50-50 share',
+    subtitle: 'Monthly · Equity split',
     icon: BarChart3, 
     iconBg: 'linear-gradient(135deg, #334155 0%, #1e293b 50%, #0f172a 100%)',
     glowColor: 'rgba(30, 41, 59, 0.5)',
-    roles: ['bb_admin', 'operations_head', 'finance_manager', 'admin']
+    roles: ['bb_admin', 'operations_head', 'finance_manager', 'franchise_partner', 'admin']
+  },
+  { 
+    path: '/partner-settlement', 
+    label: 'Partner Settlements', 
+    subtitle: 'Monthly ledger & splits',
+    icon: Handshake, 
+    iconBg: 'linear-gradient(135deg, #0e7490 0%, #0891b2 50%, #06b6d4 100%)',
+    glowColor: 'rgba(6, 182, 212, 0.45)',
+    roles: ['bb_admin', 'operations_head', 'finance_manager', 'franchise_partner', 'admin']
   },
   { 
     path: '/payroll', 

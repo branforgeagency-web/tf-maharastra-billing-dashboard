@@ -18,6 +18,7 @@ import TreasuryTransaction from './models/TreasuryTransaction.js';
 import { calculateProfitDistribution } from './services/profitSharingService.js';
 
 import User from './models/User.js';
+import jwt from 'jsonwebtoken';
 import { generateToken, verifyToken, requireRole } from './middleware/auth.js';
 
 dotenv.config();
@@ -28,8 +29,8 @@ const PORT = process.env.PORT || 5055;
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
-// Connect to MongoDB Database & seed 5 default role users
-const DEFAULT_5_USERS = [
+// Connect to MongoDB Database & seed default role users
+const DEFAULT_SYSTEM_USERS = [
   {
     email: 'management@thoughtflows.in',
     username: 'management',
@@ -65,17 +66,29 @@ const DEFAULT_5_USERS = [
     role: 'branch_head',
     branch: 'Pune (FC Road) ★',
   },
+  {
+    email: 'partner@thoughtflows.in',
+    username: 'partner',
+    password: 'partner123',
+    role: 'franchise_partner',
+    branch: 'All Branches (Global View)',
+  },
 ];
 
 const seedDefaultUsers = async () => {
   try {
-    for (const u of DEFAULT_5_USERS) {
+    for (const u of DEFAULT_SYSTEM_USERS) {
       const exists = await User.findOne({ 
         $or: [{ email: u.email }, { username: u.username }] 
       });
       if (!exists) {
         await User.create(u);
         console.log(`✓ Seeded default user: ${u.email} (${u.role})`);
+      } else if (u.role === 'franchise_partner') {
+        exists.role = 'franchise_partner';
+        exists.branch = 'All Branches (Global View)';
+        await exists.save();
+        console.log(`✓ Synchronized franchise partner: ${u.email}`);
       }
     }
   } catch (err) {
@@ -305,7 +318,16 @@ app.delete('/api/users/:id', async (req, res) => {
 app.get('/api/branches', async (req, res) => {
   try {
     const branches = await Branch.find({});
-    res.json(branches.map(b => ({ ...b.toObject(), id: b._id.toString() })));
+    res.json(branches.map(b => {
+      const obj = b.toObject();
+      let eq = obj.equityStakeholders;
+      if (eq instanceof Map) {
+        eq = Object.fromEntries(eq);
+      } else if (eq && typeof eq === 'object' && !Array.isArray(eq)) {
+        eq = { ...eq };
+      }
+      return { ...obj, equityStakeholders: eq, id: b._id.toString() };
+    }));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -473,6 +495,19 @@ app.post('/api/receipts/bulk-import', async (req, res) => {
 // DELETE /api/receipts/:id
 app.delete('/api/receipts/:id', async (req, res) => {
   try {
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      try {
+        const token = authHeader.split(' ')[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'tf-maharashtra-dashboard-secret-key-2026');
+        if (decoded && decoded.role === 'franchise_partner') {
+          return res.status(403).json({ error: 'Franchise partners are not permitted to delete uploaded receipts.' });
+        }
+      } catch (jwtErr) {
+        // Continue
+      }
+    }
+
     await Receipt.findByIdAndDelete(req.params.id);
     res.json({ message: 'Receipt deleted successfully from MongoDB database' });
   } catch (err) {
@@ -483,6 +518,19 @@ app.delete('/api/receipts/:id', async (req, res) => {
 // PUT /api/receipts/:id
 app.put('/api/receipts/:id', async (req, res) => {
   try {
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      try {
+        const token = authHeader.split(' ')[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'tf-maharashtra-dashboard-secret-key-2026');
+        if (decoded && decoded.role === 'franchise_partner') {
+          return res.status(403).json({ error: 'Franchise partners are not permitted to edit receipts once uploaded.' });
+        }
+      } catch (jwtErr) {
+        // Continue
+      }
+    }
+
     const data = req.body;
     const courseFee = parseFloat(data.courseFee) || 0;
     const amountPayingNow = parseFloat(data.amountPayingNow) || 0;
@@ -863,6 +911,8 @@ app.get('/api/pl-statement', async (req, res) => {
       totalExpenses,
       netProfit,
       branchKey: equityResult.branchKey,
+      agreement: equityResult.agreement,
+      agreementDetail: equityResult.agreementDetail,
       distribution: equityResult.distribution,
       receiptsCount: receipts.length,
       vouchersCount: vouchers.length,

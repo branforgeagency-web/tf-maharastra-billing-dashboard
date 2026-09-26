@@ -1,6 +1,6 @@
 import React, { useState, useEffect, Component } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Sidebar from './components/Sidebar';
 import TopHeader from './components/TopHeader';
@@ -17,6 +17,7 @@ import BalanceSheetView from './views/BalanceSheetView';
 import InitialInvestmentView from './views/InitialInvestmentView';
 import UserManagementView from './views/UserManagementView';
 import UserGuideView from './views/UserGuideView';
+import PartnerSettlementView from './views/PartnerSettlementView';
 
 import './styles/main.css';
 import './styles/sidebar.css';
@@ -26,7 +27,7 @@ import './styles/modal.css';
 import './styles/modules.css';
 import './styles/login.css';
 
-const ALL_ROLES = ['bb_admin', 'operations_head', 'department_head', 'finance_manager', 'branch_head', 'admin', 'management'];
+const ALL_ROLES = ['bb_admin', 'operations_head', 'department_head', 'finance_manager', 'branch_head', 'franchise_partner', 'admin', 'management'];
 
 // React Error Boundary Component to prevent white screens
 class ErrorBoundary extends Component {
@@ -81,7 +82,7 @@ function AnimatedContentWrapper({ selectedBranch, setSelectedBranch }) {
           } />
           
           <Route path="/daily-business" element={
-            <ProtectedRoute allowedRoles={['bb_admin', 'operations_head', 'department_head', 'branch_head', 'admin', 'management']}>
+            <ProtectedRoute allowedRoles={['bb_admin', 'operations_head', 'department_head', 'branch_head', 'franchise_partner', 'admin', 'management']}>
               <DailyBusinessView selectedBranch={selectedBranch} setSelectedBranch={setSelectedBranch} />
             </ProtectedRoute>
           } />
@@ -99,8 +100,14 @@ function AnimatedContentWrapper({ selectedBranch, setSelectedBranch }) {
           } />
           
           <Route path="/profit-loss" element={
-            <ProtectedRoute allowedRoles={['bb_admin', 'operations_head', 'finance_manager', 'admin']}>
+            <ProtectedRoute allowedRoles={['bb_admin', 'operations_head', 'finance_manager', 'franchise_partner', 'admin']}>
               <ProfitLossView selectedBranch={selectedBranch} setSelectedBranch={setSelectedBranch} />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/partner-settlement" element={
+            <ProtectedRoute allowedRoles={['bb_admin', 'operations_head', 'finance_manager', 'franchise_partner', 'admin']}>
+              <PartnerSettlementView selectedBranch={selectedBranch} setSelectedBranch={setSelectedBranch} />
             </ProtectedRoute>
           } />
           
